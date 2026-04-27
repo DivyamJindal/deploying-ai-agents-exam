@@ -1,19 +1,31 @@
 from __future__ import annotations
 
+import os
+import sqlite3
+from pathlib import Path
 from typing import Any
 
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import interrupt
 
+DEFAULT_CHECKPOINT_PATH = Path("checkpoints/se.sqlite")
+
+
+def get_sqlite_checkpointer(db_path: str | os.PathLike[str] | None = None) -> SqliteSaver:
+    """Build a persistent SqliteSaver, creating the parent directory as needed."""
+
+    path = Path(db_path) if db_path else DEFAULT_CHECKPOINT_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(path, check_same_thread=False)
+    return SqliteSaver(conn)
+
+from . import llm as llm_mod
 from .data import load_accounts, search_kb
 from .models import ResolutionAttempt, SupportState, SupervisorDecision
 
 ESCALATION_REFUND_THRESHOLD = 200
-ANGER_WORDS = {"angry", "furious", "third", "nobody", "escalated", "!!!", "terrible", "blocking"}
-BUG_WORDS = {"bug", "error", "crash", "failing", "failed", "broken", "upload"}
-BILLING_WORDS = {"billing", "charged", "charge", "invoice", "refund", "payment", "twice"}
-FEATURE_WORDS = {"feature", "export", "csv", "report", "integration", "request"}
 
 
 def _append_attempt(state: SupportState, attempt: ResolutionAttempt) -> list[ResolutionAttempt]:
@@ -21,16 +33,18 @@ def _append_attempt(state: SupportState, attempt: ResolutionAttempt) -> list[Res
 
 
 def classifier(state: SupportState) -> dict[str, Any]:
-    text = f"{state.ticket.title} {state.ticket.message}".lower()
-    scores = {
-        "bug": sum(word in text for word in BUG_WORDS),
-        "billing": sum(word in text for word in BILLING_WORDS),
-        "feature": sum(word in text for word in FEATURE_WORDS),
-        "general": 1,
+    result = llm_mod.classify(state.ticket.title, state.ticket.message)
+    print(f"classifier ({llm_mod.mode()}) -> {result.category} ({result.confidence:.2f})")
+    return {
+        "category": result.category,
+        "ticket_metadata": {
+            "category": result.category,
+            "status": "classified",
+            "classifier_mode": llm_mod.mode(),
+            "classifier_confidence": f"{result.confidence:.2f}",
+            "classifier_rationale": result.rationale,
+        },
     }
-    category = max(scores, key=scores.get)
-    print(f"classifier -> {category}")
-    return {"category": category, "ticket_metadata": {"category": category, "status": "classified"}}
 
 
 def route_by_category(state: SupportState) -> str:
@@ -38,11 +52,16 @@ def route_by_category(state: SupportState) -> str:
 
 
 def sentiment_monitor(state: SupportState) -> dict[str, Any]:
-    text = state.ticket.message.lower()
-    anger_hits = sum(1 for word in ANGER_WORDS if word in text)
-    score = min(1.0, anger_hits / 3)
-    print(f"sentiment_monitor -> {score:.2f}")
-    return {"sentiment_score": score}
+    result = llm_mod.sentiment(state.ticket.message)
+    print(f"sentiment_monitor ({llm_mod.mode()}) -> {result.score:.2f} ({result.label})")
+    return {
+        "sentiment_score": result.score,
+        "ticket_metadata": {
+            "sentiment_label": result.label,
+            "sentiment_mode": llm_mod.mode(),
+            "sentiment_rationale": result.rationale,
+        },
+    }
 
 
 def general_solver(state: SupportState) -> dict[str, Any]:
@@ -168,4 +187,10 @@ def build_graph(checkpointer: Any | None = None):
         workflow.add_edge(solver, "escalation_gate")
     workflow.add_edge("escalation_gate", "response_composer")
     workflow.add_edge("response_composer", END)
-    return workflow.compile(checkpointer=checkpointer or MemorySaver())
+    if checkpointer is None:
+        try:
+            checkpointer = get_sqlite_checkpointer()
+        except Exception as exc:  # pragma: no cover - sqlite should always work locally
+            print(f"[graph] SqliteSaver unavailable, falling back to MemorySaver: {exc}")
+            checkpointer = MemorySaver()
+    return workflow.compile(checkpointer=checkpointer)

@@ -34,7 +34,23 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-No paid LLM key is required for the demo version because the solvers use deterministic rubric-friendly logic over local sample data. An LLM classifier/sentiment prompt can be swapped in later if desired.
+### Optional: enable the real LLM in the loop
+
+The classifier and sentiment monitor will automatically use OpenAI when an `OPENAI_API_KEY` is configured. Otherwise they fall back to a deterministic rule-based implementation so the demo always works offline.
+
+Copy the template and add your key:
+
+```bash
+cp .env.example .env
+# edit .env and set OPENAI_API_KEY=sk-...
+# default model is gpt-4.1-nano (small, fast, cheap)
+```
+
+The Streamlit header shows a **Mode** pill (`LLM` or `Rule-based`) so reviewers can see which path is live.
+
+### Persistent checkpoints
+
+The graph compiles with a `SqliteSaver` checkpointer at `checkpoints/se.sqlite` by default, so any interrupted run can be resumed across restarts using its thread ID. The sidebar in the Streamlit app exposes the active thread ID and a picker to resume previous threads.
 
 ## Run the Ticketing Console
 
@@ -74,15 +90,6 @@ This prototype uses synthetic support data committed in `data/`:
 - `data/kb.json`: small SaaS FAQ / knowledge base.
 - `data/accounts.json`: mock account and refund data.
 - `data/demo_tickets.json`: demo tickets mapped to the presentation flow.
-
-## Team Roles
-
-Update before submission:
-
-- Member 1: Graph architecture and LangGraph interrupts
-- Member 2: Streamlit UI and demo recording
-- Member 3: KB/account data and solver logic
-- Member 4: README, memo, deck, tests, and Q&A prep
 
 ## KPIs
 

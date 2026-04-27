@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -11,8 +11,9 @@ import pandas as pd
 import streamlit as st
 from langgraph.types import Command
 
+from support_escalator import llm as llm_mod
 from support_escalator.data import load_accounts
-from support_escalator.graph import build_graph
+from support_escalator.graph import build_graph, get_sqlite_checkpointer
 from support_escalator.models import SupportState, TicketInput
 from support_escalator.ui_state import (
     extract_interrupt,
@@ -198,10 +199,12 @@ st.markdown(THEME_CSS, unsafe_allow_html=True)
 # Session state
 # ---------------------------------------------------------------------------
 
+if "checkpointer" not in st.session_state:
+    st.session_state.checkpointer = get_sqlite_checkpointer()
 if "thread_id" not in st.session_state:
     st.session_state.thread_id = f"ticket-{uuid4().hex[:8]}"
 if "graph" not in st.session_state:
-    st.session_state.graph = build_graph()
+    st.session_state.graph = build_graph(checkpointer=st.session_state.checkpointer)
 if "last_result" not in st.session_state:
     st.session_state.last_result = None
 if "pending_interrupt" not in st.session_state:
@@ -228,15 +231,58 @@ def capture_result(result) -> None:
     if not st.session_state.pending_interrupt and plain.get("final_response"):
         summary = summarize_run(plain)
         summary["thread_id"] = st.session_state.thread_id
-        summary["completed_at"] = datetime.utcnow().isoformat(timespec="seconds")
+        summary["completed_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
         st.session_state.history.append(summary)
 
 
 def reset_thread() -> None:
     st.session_state.thread_id = f"ticket-{uuid4().hex[:8]}"
-    st.session_state.graph = build_graph()
     st.session_state.last_result = None
     st.session_state.pending_interrupt = None
+
+
+def load_thread(thread_id: str) -> None:
+    """Load an existing thread from the persistent checkpointer."""
+
+    st.session_state.thread_id = thread_id
+    st.session_state.last_result = None
+    st.session_state.pending_interrupt = None
+    cfg = {"configurable": {"thread_id": thread_id}}
+    snapshot = st.session_state.graph.get_state(cfg)
+    if snapshot and snapshot.values:
+        plain = to_plain(snapshot.values)
+        st.session_state.last_result = plain
+        # If the run was paused at an interrupt, surface it again.
+        tasks = getattr(snapshot, "tasks", []) or []
+        for task in tasks:
+            interrupts = getattr(task, "interrupts", None) or []
+            if interrupts:
+                payload = getattr(interrupts[0], "value", interrupts[0])
+                st.session_state.pending_interrupt = to_plain(payload)
+                break
+
+
+def list_threads(limit: int = 25) -> list[str]:
+    """List recent thread IDs from the SqliteSaver."""
+
+    seen: list[str] = []
+    try:
+        for ckpt in st.session_state.checkpointer.list(None, limit=limit):
+            cfg = getattr(ckpt, "config", None) or {}
+            tid = (cfg.get("configurable") or {}).get("thread_id")
+            if tid and tid not in seen:
+                seen.append(tid)
+    except Exception:
+        pass
+    return seen
+
+
+def mode_pill_html() -> str:
+    if llm_mod.mode() == "llm":
+        return (
+            f'<span class="badge ok">⚡ LLM · {llm_mod.model_name()}</span>'
+        )
+    return '<span class="badge">🧮 Rule-based fallback</span>'
 
 
 def category_badge_html(category: str | None) -> str:
@@ -392,9 +438,32 @@ with st.sidebar:
     st.divider()
     st.markdown("**Active thread**")
     st.code(st.session_state.thread_id, language="text")
+    st.caption("Persisted in `checkpoints/se.sqlite` via SqliteSaver.")
     if st.button("➕ New ticket thread", use_container_width=True):
         reset_thread()
         st.rerun()
+
+    threads = list_threads()
+    if threads:
+        with st.expander(f"⏪ Resume previous thread ({len(threads)})"):
+            choice = st.selectbox(
+                "Pick a thread to load",
+                options=threads,
+                index=0,
+                key="thread_picker",
+                label_visibility="collapsed",
+            )
+            if st.button("Load thread", use_container_width=True):
+                load_thread(choice)
+                st.rerun()
+
+    st.divider()
+    st.markdown("**Engine mode**")
+    st.markdown(mode_pill_html(), unsafe_allow_html=True)
+    if llm_mod.mode() == "rule_based":
+        st.caption("Set `OPENAI_API_KEY` in `.env` to enable the LLM in the loop.")
+    else:
+        st.caption(f"Classifier + sentiment use {llm_mod.model_name()} with structured output.")
 
     st.divider()
     st.markdown("**Demo queue**")
@@ -440,7 +509,9 @@ st.markdown(
     <div class="brand"><span class="dot">●</span>SupportEscalator Console</div>
     <div class="meta">LangGraph routing · Sentiment-aware · Human-in-the-loop escalation</div>
   </div>
-  <div>{header_category} {header_status}</div>
+  <div style="display:flex; gap:8px; align-items:center;">
+    {mode_pill_html()} {header_category} {header_status}
+  </div>
 </div>
 """,
     unsafe_allow_html=True,

@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>SupportEscalator · LangGraph for routine + risky tickets</title>
+
+  <!-- Reveal.js core -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+
+  <!-- Fonts: supermemory.ai vibe = IBM Plex Sans + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --bg: #060a1a;
+      --bg-2: #0b1233;
+      --ink: #e6ecff;
+      --ink-2: #a4b1d4;
+      --line: #1c2554;
+      --blue: #4f7dff;
+      --blue-2: #84a4ff;
+      --blue-3: #1f3aa3;
+      --accent: #00e0ff;
+      --warn: #ffb454;
+      --ok: #5fffa7;
+      --bad: #ff7a8a;
+      --grid: rgba(79, 125, 255, 0.07);
+    }
+
+    html, body { background: var(--bg); margin: 0; }
+
+    /* Reveal.js v5 paints these white by default — we want deep navy everywhere. */
+    .reveal-viewport,
+    .reveal,
+    .reveal .slides,
+    .reveal .backgrounds,
+    .reveal .slides > section,
+    .reveal .slides > section > section {
+      background: var(--bg) !important;
+    }
+
+    .reveal {
+      font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      font-weight: 400;
+    }
+
+    /* Subtle grid background — supermemory's signature */
+    .reveal .slides::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      pointer-events: none;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+      z-index: 0;
+    }
+
+    .reveal .slides section {
+      text-align: left;
+      padding: 4vh 6vw;
+      box-sizing: border-box;
+    }
+
+    .reveal h1, .reveal h2, .reveal h3 {
+      font-family: "IBM Plex Sans", sans-serif;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      text-transform: none;
+      font-weight: 600;
+      line-height: 1.05;
+      margin: 0 0 0.6em 0;
+    }
+    .reveal h1 { font-size: 4.2rem; font-weight: 700; }
+    .reveal h2 { font-size: 2.6rem; }
+    .reveal h3 { font-size: 1.6rem; color: var(--blue-2); font-weight: 500; }
+    .reveal p { font-size: 1.25rem; color: var(--ink-2); line-height: 1.55; }
+    .reveal li { color: var(--ink-2); margin: 0.35em 0; font-size: 1.15rem; }
+    .reveal code, .reveal pre {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.95rem;
+      color: var(--accent);
+      background: rgba(79, 125, 255, 0.08);
+      border-radius: 6px;
+      padding: 2px 7px;
+    }
+    .reveal pre {
+      background: linear-gradient(180deg, #0a1130 0%, #060a1a 100%);
+      border: 1px solid var(--line);
+      padding: 18px 22px;
+      color: var(--ink);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    .reveal a { color: var(--blue-2); }
+
+    /* Eyebrow / kicker */
+    .kicker {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      color: var(--blue-2);
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .kicker::before {
+      content: "";
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    /* Pills */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(79, 125, 255, 0.06);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.8rem;
+      color: var(--ink-2);
+    }
+    .pill.ok { color: var(--ok); border-color: rgba(95, 255, 167, 0.35); }
+    .pill.warn { color: var(--warn); border-color: rgba(255, 180, 84, 0.35); }
+    .pill.bad { color: var(--bad); border-color: rgba(255, 122, 138, 0.35); }
+    .pill.blue { color: var(--blue-2); border-color: rgba(79, 125, 255, 0.45); }
+
+    /* Card / panel */
+    .panel {
+      background: linear-gradient(180deg, rgba(11,18,51,0.65) 0%, rgba(6,10,26,0.65) 100%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 22px 26px;
+      backdrop-filter: blur(8px);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+    .grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+    .kpi {
+      background: linear-gradient(180deg, #0c1638 0%, #060a1a 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi::after {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: 14px;
+      pointer-events: none;
+      background: radial-gradient(circle at top right, rgba(79,125,255,0.18), transparent 60%);
+    }
+    .kpi .num {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .kpi .num .unit { font-size: 1.2rem; color: var(--blue-2); margin-left: 4px; }
+    .kpi .label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      margin-top: 8px;
+    }
+
+    /* TITLE SLIDE — animated orb */
+    .title-stage {
+      min-height: 86vh;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      align-items: center;
+      gap: 4vw;
+    }
+    .title-stage h1 {
+      font-size: 5rem;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .title-stage h1 .accent {
+      background: linear-gradient(90deg, var(--blue-2) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .title-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    .orb-wrap {
+      position: relative;
+      width: 100%;
+      height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #orb { width: 100%; height: 100%; }
+    .orb-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 12% 12%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79,125,255,0.35) 0%, transparent 60%);
+      filter: blur(40px);
+      z-index: 0;
+    }
+
+    /* Slide footer */
+    .slide-footer {
+      position: fixed;
+      bottom: 18px;
+      left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 32px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      opacity: 0.55;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* 3D graph slide */
+    .graph-stage {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 28px;
+      height: 70vh;
+    }
+    #graph3d {
+      width: 100%; height: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background: radial-gradient(ellipse at center, rgba(79,125,255,0.08) 0%, transparent 70%), var(--bg);
+    }
+    .graph-legend {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.85rem;
+      color: var(--ink-2);
+      margin-top: 12px;
+    }
+    .legend-dot {
+      display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+      margin-right: 8px; vertical-align: middle;
+    }
+
+    /* Lines / list with mono labels */
+    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+    .stat-row:last-child { border-bottom: 0; }
+    .stat-row .k { font-family: "JetBrains Mono", monospace; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); }
+    .stat-row .v { font-family: "JetBrains Mono", monospace; color: var(--ink); }
+
+    /* Reveal print fix for navy bg */
+    .reveal .slides section.has-light-background { background: var(--bg); }
+    .reveal .progress { color: var(--blue); }
+
+    /* Hide reveal controls on title */
+    section[data-state="title"] + .reveal__controls { display: none; }
+
+    .architecture-svg { background: var(--bg); border-radius: 12px; padding: 12px; }
+    .architecture-svg svg { width: 100%; height: auto; }
+
+    @media (max-width: 1024px) {
+      .title-stage { grid-template-columns: 1fr; }
+      .orb-wrap { height: 40vh; }
+      .graph-stage { grid-template-columns: 1fr; height: auto; }
+      #graph3d { height: 50vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="slide-footer">
+    <span>SupportEscalator · LangGraph + LLM</span>
+    <span>Mosaic Cloud · UGDSAI 29</span>
+  </div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================== TITLE ============================== -->
+      <section data-state="title">
+        <div class="title-stage">
+          <div>
+            <span class="kicker">UGDSAI 29 · Problem 9 · Take-home</span>
+            <h1>
+              Support<span class="accent">Escalator.</span>
+            </h1>
+            <p style="font-size:1.4rem; color: var(--ink-2); margin-top: 14px; max-width: 540px;">
+              A LangGraph agent that resolves routine support tickets autonomously and escalates risky ones to a human — with persistent state, sentiment-aware routing, and a real LLM in the loop.
+            </p>
+            <div class="title-meta">
+              <span class="pill blue">LangGraph</span>
+              <span class="pill blue">Pydantic v2</span>
+              <span class="pill blue">Streamlit</span>
+              <span class="pill ok">⚡ gpt-4.1-nano</span>
+              <span class="pill warn">SqliteSaver</span>
+            </div>
+          </div>
+          <div class="orb-wrap">
+            <canvas id="orb"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== PROBLEM ============================== -->
+      <section>
+        <span class="kicker">01 · Problem</span>
+        <h2>Mosaic Cloud handles 2,000+ tickets / day.</h2>
+        <p style="max-width: 800px;">
+          Most are routine. A small fraction are <em style="color: var(--bad); font-style: normal;">risky</em> — refunds, churn signals, hard bugs.
+          Routing them all through humans is slow. Routing them all through one LLM is unsafe.
+        </p>
+
+        <div class="grid cols-4" style="margin-top: 36px;">
+          <div class="kpi"><div class="num">2,000<span class="unit">/day</span></div><div class="label">Inbound tickets</div></div>
+          <div class="kpi"><div class="num">68<span class="unit">%</span></div><div class="label">Routine (auto-resolvable)</div></div>
+          <div class="kpi"><div class="num">22<span class="unit">%</span></div><div class="label">Need supervisor</div></div>
+          <div class="kpi"><div class="num">$48k<span class="unit">/mo</span></div><div class="label">Avg refund exposure</div></div>
+        </div>
+
+        <p style="margin-top: 28px; max-width: 780px;">
+          The goal isn't just <em>answer faster</em>. It's <em>route correctly</em>, <em>pause safely</em>,
+          and <em>resume from where the human left off</em>.
+        </p>
+      </section>
+
+      <!-- ============================== WHY LANGGRAPH ============================== -->
+      <section>
+        <span class="kicker">02 · Architecture choice</span>
+        <h2>Why LangGraph, not a single chatbot.</h2>
+
+        <div class="grid cols-2" style="margin-top: 28px;">
+          <div class="panel">
+            <h3 style="color: var(--bad);">Single chatbot</h3>
+            <ul>
+              <li>Conditional routing buried in a prompt</li>
+              <li>No clean way to pause for a human</li>
+              <li>State is implicit, untyped, easily lost</li>
+              <li>"Resume" means replaying the full chat</li>
+              <li>Sentiment + escalation rules drift together</li>
+            </ul>
+          </div>
+          <div class="panel" style="border-color: rgba(95,255,167,0.35); box-shadow: 0 0 40px rgba(95,255,167,0.05);">
+            <h3 style="color: var(--ok);">LangGraph</h3>
+            <ul>
+              <li>Explicit nodes for classify / solve / monitor / escalate</li>
+              <li><code>interrupt()</code> pauses and persists waiting for the human</li>
+              <li><code>SqliteSaver</code> checkpoints survive process restarts</li>
+              <li><code>Command(resume=…)</code> picks up at the exact node</li>
+              <li>Pydantic <code>SupportState</code> = one schema, one source of truth</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 28px; color: var(--ink); font-size: 1.15rem;">
+          <span class="pill blue">key insight</span>
+          &nbsp; The interesting work isn't the LLM call. It's the <em>orchestration</em> around it.
+        </p>
+      </section>
+
+      <!-- ============================== ARCHITECTURE / 3D GRAPH ============================== -->
+      <section>
+        <span class="kicker">03 · Architecture</span>
+        <h2>The graph, live.</h2>
+
+        <div class="graph-stage">
+          <div>
+            <div class="panel" style="height: 100%;">
+              <div class="stat-row"><span class="k">classifier</span><span class="v">→ category</span></div>
+              <div class="stat-row"><span class="k">sentiment_monitor</span><span class="v">→ score 0..1</span></div>
+              <div class="stat-row"><span class="k">{bug,billing,feature,general}_solver</span><span class="v">→ ResolutionAttempt</span></div>
+              <div class="stat-row"><span class="k">escalation_gate</span><span class="v" style="color: var(--warn);">interrupt()</span></div>
+              <div class="stat-row"><span class="k">supervisor</span><span class="v">human-in-the-loop</span></div>
+              <div class="stat-row"><span class="k">response_composer</span><span class="v">→ final_response</span></div>
+
+              <div style="margin-top: 22px;">
+                <span class="pill ok">⚡ classifier &amp; sentiment use gpt-4.1-nano</span>
+              </div>
+              <div style="margin-top: 10px;">
+                <span class="pill warn">interrupts persist via SqliteSaver</span>
+              </div>
+              <div class="graph-legend" style="margin-top: 22px;">
+                <div><span class="legend-dot" style="background: #4f7dff;"></span>routing node</div>
+                <div><span class="legend-dot" style="background: #00e0ff;"></span>solver</div>
+                <div><span class="legend-dot" style="background: #ffb454;"></span>gate / interrupt</div>
+                <div><span class="legend-dot" style="background: #5fffa7;"></span>terminal</div>
+              </div>
+            </div>
+          </div>
+          <div id="graph3d"></div>
+        </div>
+        <p style="margin-top: 14px; color: var(--ink-2); font-size: 0.95rem;">
+          Drag · zoom · click any node to follow its outgoing edges. The same SVG renders inside the Streamlit app's <strong>Architecture</strong> tab.
+        </p>
+      </section>
+
+      <!-- ============================== STATE SCHEMA ============================== -->
+      <section>
+        <span class="kicker">04 · State</span>
+        <h2>One Pydantic schema, end to end.</h2>
+
+        <div class="grid cols-2" style="margin-top: 22px; align-items: stretch;">
+          <div>
+            <pre><code class="language-python">class SupportState(BaseModel):
+    ticket: TicketInput
+    category: TicketCategory | None = None
+    resolution_attempts: list[ResolutionAttempt] = []
+    sentiment_score: float = 0.0
+    escalation_reason: str | None = None
+    supervisor_input: str | None = None
+    final_response: str | None = None
+    ticket_metadata: dict[str, str] = {}</code></pre>
+
+            <p style="margin-top: 18px; font-size: 1rem;">
+              Every node returns a <em>partial</em> state dict. LangGraph merges. Pydantic validates.
+              The UI never sees a raw <code>__interrupt__</code> tuple it can't render.
+            </p>
+          </div>
+          <div class="panel">
+            <h3>The normalization layer</h3>
+            <p style="font-size: 1rem;">
+              Streamlit can receive a Pydantic model, a dict, or a LangGraph <code>Interrupt</code>.
+              <code>ui_state.to_plain()</code> recursively converts <em>anything</em> into JSON-safe primitives.
+            </p>
+            <pre style="margin-top: 12px;"><code class="language-python">def to_plain(obj):
+    if isinstance(obj, BaseModel):
+        return to_plain(obj.model_dump())
+    if isinstance(obj, dict):
+        return {k: to_plain(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [to_plain(x) for x in obj]
+    return obj</code></pre>
+            <p style="margin-top: 12px; font-size: 0.95rem; color: var(--ink-2);">
+              Killed the <code>'ResolutionAttempt' object is not subscriptable</code> bug for good. <span class="pill ok">17 / 17 tests</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== DEMO 1 ============================== -->
+      <section>
+        <span class="kicker">05 · Demo path 1</span>
+        <h2>Auto-resolution. Never sees a human.</h2>
+
+        <div class="grid cols-2" style="margin-top: 24px;">
+          <div class="panel">
+            <h3>Ticket</h3>
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--ink);">
+              <em style="color: var(--blue-2); font-style: normal;">acct_1001</em> · "How do I reset my password?"
+            </p>
+            <div class="stat-row"><span class="k">classifier (llm)</span><span class="v">general · 0.86</span></div>
+            <div class="stat-row"><span class="k">sentiment</span><span class="v">0.00 calm</span></div>
+            <div class="stat-row"><span class="k">general_solver</span><span class="v" style="color: var(--ok);">resolved ✓</span></div>
+            <div class="stat-row"><span class="k">escalation_gate</span><span class="v">passes through</span></div>
+            <div class="stat-row"><span class="k">response_composer</span><span class="v" style="color: var(--ok);">final ✓</span></div>
+          </div>
+          <div class="panel">
+            <h3>Walkthrough</h3>
+            <ol style="color: var(--ink-2);">
+              <li>Open <strong>Inbox</strong> workspace</li>
+              <li>Pick the password-reset demo ticket</li>
+              <li>Run — watch the timeline animate node-by-node</li>
+              <li>Solver attempt expands inline, KB hit shown</li>
+              <li>Final response composes — header flips green</li>
+            </ol>
+            <p style="margin-top: 14px;">
+              <span class="pill ok">~2.1s end-to-end</span>
+              <span class="pill blue" style="margin-left: 6px;">no interrupt</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== DEMO 2 ============================== -->
+      <section>
+        <span class="kicker">06 · Demo path 2</span>
+        <h2>Refund above threshold → human-in-the-loop.</h2>
+
+        <div class="grid cols-2" style="margin-top: 24px;">
+          <div class="panel">
+            <h3>Ticket</h3>
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--ink);">
+              <em style="color: var(--blue-2); font-style: normal;">acct_1002</em> · "I was charged twice for invoice 42, please refund."
+            </p>
+            <div class="stat-row"><span class="k">classifier (llm)</span><span class="v">billing · 0.94</span></div>
+            <div class="stat-row"><span class="k">billing_solver</span><span class="v" style="color: var(--warn);">unresolved · refund &gt; $200</span></div>
+            <div class="stat-row"><span class="k">escalation_gate</span><span class="v" style="color: var(--warn);">interrupt() ⏸</span></div>
+          </div>
+          <div class="panel" style="border-color: rgba(255,180,84,0.35);">
+            <h3>Supervisor card appears</h3>
+            <ul>
+              <li>Reason · refund exposure exceeds threshold</li>
+              <li>Account context · plan, MRR, refund history</li>
+              <li>Sentiment · 0.10 calm</li>
+              <li>Approve or reject + free-form guidance</li>
+            </ul>
+            <p style="margin-top: 14px;">
+              <span class="pill warn">paused on disk</span>
+              <span class="pill blue" style="margin-left: 6px;">resume via Command(resume=…)</span>
+            </p>
+            <p style="font-size: 0.95rem; color: var(--ink-2); margin-top: 10px;">
+              Kill the process now. Restart Streamlit. The ticket is still paused — pick it from the sidebar's <em>Resume previous thread</em>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== DEMO 3 ============================== -->
+      <section>
+        <span class="kicker">07 · Demo path 3</span>
+        <h2>Sentiment escalation. Tone, not topic.</h2>
+
+        <div class="grid cols-2" style="margin-top: 24px;">
+          <div class="panel">
+            <h3>Ticket</h3>
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--ink);">
+              <em style="color: var(--blue-2); font-style: normal;">acct_1003</em> · "This is my third email and nobody is helping!!! Upload is failing."
+            </p>
+            <div class="stat-row"><span class="k">classifier (llm)</span><span class="v">bug · 0.92</span></div>
+            <div class="stat-row"><span class="k">sentiment (llm)</span><span class="v" style="color: var(--bad);">0.80 frustrated</span></div>
+            <div class="stat-row"><span class="k">bug_solver</span><span class="v" style="color: var(--warn);">unresolved</span></div>
+            <div class="stat-row"><span class="k">escalation_gate</span><span class="v" style="color: var(--warn);">interrupt() ⏸</span></div>
+          </div>
+          <div class="panel">
+            <h3>Why this matters</h3>
+            <p>
+              The solver couldn't fix it <em>and</em> the customer is venting. Two independent risk signals — refund threshold doesn't fire here, sentiment does.
+            </p>
+            <p style="margin-top: 12px;">
+              Reject the auto-response. Final response stays <em>open</em> with rejection guidance attached, not auto-closed.
+            </p>
+            <p style="margin-top: 14px;">
+              <span class="pill bad">two-axis escalation</span>
+              <span class="pill blue" style="margin-left: 6px;">tone-aware</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== KPIs ============================== -->
+      <section>
+        <span class="kicker">08 · Business impact</span>
+        <h2>KPIs visible in the dashboard, live.</h2>
+
+        <div class="grid cols-4" style="margin-top: 28px;">
+          <div class="kpi"><div class="num">68<span class="unit">%</span></div><div class="label">Auto-resolution rate</div></div>
+          <div class="kpi"><div class="num">22<span class="unit">%</span></div><div class="label">Escalations</div></div>
+          <div class="kpi"><div class="num">0.34</div><div class="label">Avg sentiment</div></div>
+          <div class="kpi"><div class="num">$1.6k</div><div class="label">Refund exposure (session)</div></div>
+        </div>
+
+        <div class="grid cols-2" style="margin-top: 28px;">
+          <div class="panel">
+            <h3>Charts the Analytics tab renders</h3>
+            <ul>
+              <li>Category mix (bug / billing / feature / general)</li>
+              <li>Sentiment trend across the session</li>
+              <li>Solver status (resolved vs unresolved)</li>
+              <li>Escalation reasons (refund vs sentiment vs unresolved)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>Mosaic Cloud KPIs we move</h3>
+            <ul>
+              <li><strong>First-response time</strong> ↓ — auto-resolved in seconds, not hours</li>
+              <li><strong>Refund leakage</strong> ↓ — every refund &gt; $200 hits a human</li>
+              <li><strong>CSAT</strong> ↑ — frustrated customers always meet a human</li>
+              <li><strong>Agent load</strong> ↓ — only the 22% that need it</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== EDGE CASES ============================== -->
+      <section>
+        <span class="kicker">09 · Edge cases</span>
+        <h2>What the graph handles by design.</h2>
+
+        <div class="grid cols-3" style="margin-top: 28px;">
+          <div class="panel">
+            <h3 style="color: var(--warn);">Missing account</h3>
+            <p style="font-size: 1rem;">Solver attempt records the gap, gate inspects, supervisor decides whether to ask the customer or proceed.</p>
+          </div>
+          <div class="panel">
+            <h3 style="color: var(--warn);">Unresolved bug</h3>
+            <p style="font-size: 1rem;">Solver returns <code>resolved=False</code>. Gate trips. Supervisor sees the diagnosis trail.</p>
+          </div>
+          <div class="panel">
+            <h3 style="color: var(--warn);">Angry tone</h3>
+            <p style="font-size: 1rem;">Sentiment ≥ 0.67 always escalates regardless of category — the cheapest CSAT save we own.</p>
+          </div>
+          <div class="panel">
+            <h3 style="color: var(--warn);">Refund &gt; threshold</h3>
+            <p style="font-size: 1rem;">Hard-coded $200 cap — adjustable via supervisor guidance, never auto-fired by the LLM.</p>
+          </div>
+          <div class="panel">
+            <h3 style="color: var(--warn);">Supervisor rejection</h3>
+            <p style="font-size: 1rem;">Final response includes the rejection guidance and stays <em>open</em>; doesn't auto-resolve.</p>
+          </div>
+          <div class="panel">
+            <h3 style="color: var(--warn);">LLM failure</h3>
+            <p style="font-size: 1rem;">Classifier and sentiment fall back to deterministic rule-based scoring. Demo never breaks.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== LEARNINGS ============================== -->
+      <section>
+        <span class="kicker">10 · Learnings &amp; next</span>
+        <h2>What we'd ship next.</h2>
+
+        <div class="grid cols-2" style="margin-top: 28px;">
+          <div class="panel">
+            <h3>Learnings</h3>
+            <ul>
+              <li>Routing + interrupts &gt; one big prompt</li>
+              <li>Pydantic + a normalization layer = bug-free UI</li>
+              <li>Persistent checkpoints turn the demo into a real product</li>
+              <li>LLM is a <em>node</em>, not the whole agent</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>Next steps</h3>
+            <ul>
+              <li>SLA timers — sidebar control already wired</li>
+              <li>Zendesk webhook adapter (one-way ingest first)</li>
+              <li>Multilingual response drafting</li>
+              <li>CSV / PDF export from the Inbox</li>
+              <li>RAG into the KB for solver grounding</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px; font-size: 1.15rem; color: var(--ink);">
+          The whole thing runs in &lt;200ms without an LLM, and ~2s with <code>gpt-4.1-nano</code>. The supervisor is the long pole — and that's correct.
+        </p>
+      </section>
+
+      <!-- ============================== Q&A ============================== -->
+      <section>
+        <span class="kicker">11 · Q&amp;A</span>
+        <h2>Thank you.</h2>
+        <p style="font-size: 1.4rem; max-width: 720px;">
+          The repo is public. The graph is one file. The state is one schema. The supervisor is a real human, not a prompt pretending.
+        </p>
+
+        <div style="margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
+          <span class="pill blue">github.com/DivyamJindal/deploying-ai-agents-exam</span>
+          <span class="pill ok">17/17 tests</span>
+          <span class="pill blue">streamlit run app.py</span>
+        </div>
+
+        <p style="margin-top: 36px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--ink-2);">
+          Press <code>?</code> for keyboard shortcuts · <code>S</code> for speaker notes
+        </p>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Reveal core -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+
+  <!-- three.js for the orb (loaded as a UMD global) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+  <!-- 3d-force-graph for the architecture slide -->
+  <script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
+
+  <script>
+    // ============================== REVEAL ==============================
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      backgroundTransition: 'fade',
+      controls: true,
+      progress: true,
+      width: 1600,
+      height: 1000,
+      margin: 0.04,
+      minScale: 0.3,
+      maxScale: 1.6,
+    });
+
+    // ============================== ANIMATED ORB (title slide) ==============================
+    (function () {
+      const canvas = document.getElementById('orb');
+      if (!canvas || typeof THREE === 'undefined') return;
+
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+      camera.position.set(0, 0, 5);
+
+      // Wireframe icosahedron — supermemory's blue orb cousin
+      const geom = new THREE.IcosahedronGeometry(1.6, 4);
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0x4f7dff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.55,
+      });
+      const orb = new THREE.Mesh(geom, mat);
+      scene.add(orb);
+
+      // Glow shell
+      const glowGeom = new THREE.IcosahedronGeometry(1.85, 2);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: 0x00e0ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.18,
+      });
+      const glow = new THREE.Mesh(glowGeom, glowMat);
+      scene.add(glow);
+
+      // Particles
+      const partGeom = new THREE.BufferGeometry();
+      const N = 600;
+      const positions = new Float32Array(N * 3);
+      for (let i = 0; i < N; i++) {
+        const r = 2.4 + Math.random() * 1.8;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        positions[i * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[i * 3 + 2] = r * Math.cos(phi);
+      }
+      partGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const partMat = new THREE.PointsMaterial({
+        color: 0x84a4ff,
+        size: 0.025,
+        transparent: true,
+        opacity: 0.7,
+      });
+      const particles = new THREE.Points(partGeom, partMat);
+      scene.add(particles);
+
+      function resize() {
+        const r = canvas.getBoundingClientRect();
+        renderer.setSize(r.width, r.height, false);
+        camera.aspect = r.width / Math.max(r.height, 1);
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      let t = 0;
+      function animate() {
+        t += 0.005;
+        orb.rotation.y += 0.0035;
+        orb.rotation.x += 0.0015;
+        glow.rotation.y -= 0.0018;
+        particles.rotation.y += 0.0008;
+        camera.position.x = Math.sin(t) * 0.25;
+        camera.position.y = Math.cos(t * 0.7) * 0.18;
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    // ============================== 3D FORCE GRAPH (architecture slide) ==============================
+    (function () {
+      const el = document.getElementById('graph3d');
+      if (!el || typeof ForceGraph3D === 'undefined') return;
+
+      const COLORS = {
+        routing: '#4f7dff',
+        solver: '#00e0ff',
+        gate: '#ffb454',
+        terminal: '#5fffa7',
+        start: '#ffffff',
+      };
+
+      const data = {
+        nodes: [
+          { id: 'START', kind: 'start', val: 6 },
+          { id: 'classifier', kind: 'routing', val: 12 },
+          { id: 'sentiment_monitor', kind: 'routing', val: 10 },
+          { id: 'bug_solver', kind: 'solver', val: 8 },
+          { id: 'billing_solver', kind: 'solver', val: 8 },
+          { id: 'feature_solver', kind: 'solver', val: 8 },
+          { id: 'general_solver', kind: 'solver', val: 8 },
+          { id: 'escalation_gate', kind: 'gate', val: 14 },
+          { id: 'supervisor', kind: 'gate', val: 10 },
+          { id: 'response_composer', kind: 'terminal', val: 12 },
+          { id: 'END', kind: 'terminal', val: 6 },
+        ],
+        links: [
+          { source: 'START', target: 'classifier' },
+          { source: 'classifier', target: 'sentiment_monitor' },
+          { source: 'sentiment_monitor', target: 'bug_solver' },
+          { source: 'sentiment_monitor', target: 'billing_solver' },
+          { source: 'sentiment_monitor', target: 'feature_solver' },
+          { source: 'sentiment_monitor', target: 'general_solver' },
+          { source: 'bug_solver', target: 'escalation_gate' },
+          { source: 'billing_solver', target: 'escalation_gate' },
+          { source: 'feature_solver', target: 'escalation_gate' },
+          { source: 'general_solver', target: 'escalation_gate' },
+          { source: 'escalation_gate', target: 'supervisor', interrupt: true },
+          { source: 'supervisor', target: 'response_composer' },
+          { source: 'escalation_gate', target: 'response_composer' },
+          { source: 'response_composer', target: 'END' },
+        ],
+      };
+
+      const Graph = ForceGraph3D()(el)
+        .backgroundColor('rgba(0,0,0,0)')
+        .nodeLabel((n) => `<div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#e6ecff; padding:6px 9px; background:#0b1233; border:1px solid #1c2554; border-radius:6px;">${n.id}</div>`)
+        .nodeColor((n) => COLORS[n.kind] || '#4f7dff')
+        .nodeOpacity(0.95)
+        .linkColor((l) => (l.interrupt ? '#ffb454' : 'rgba(132,164,255,0.55)'))
+        .linkWidth((l) => (l.interrupt ? 1.2 : 0.6))
+        .linkDirectionalParticles((l) => (l.interrupt ? 4 : 2))
+        .linkDirectionalParticleSpeed(0.006)
+        .linkDirectionalParticleColor((l) => (l.interrupt ? '#ffb454' : '#84a4ff'))
+        .linkDirectionalParticleWidth(2)
+        .nodeThreeObjectExtend(false)
+        .graphData(data);
+
+      // Lazy resize on slide change
+      function resizeGraph() {
+        const r = el.getBoundingClientRect();
+        Graph.width(r.width).height(r.height);
+      }
+      resizeGraph();
+      window.addEventListener('resize', resizeGraph);
+      Reveal.on('slidechanged', () => setTimeout(resizeGraph, 50));
+
+      // Gentle camera drift
+      let drift = 0;
+      setInterval(() => {
+        drift += 0.005;
+        const cam = Graph.cameraPosition();
+        Graph.cameraPosition({
+          x: cam.x + Math.sin(drift) * 0.6,
+          y: cam.y + Math.cos(drift * 0.8) * 0.3,
+        });
+      }, 60);
+    })();
+  </script>
+</body>
+</html>
