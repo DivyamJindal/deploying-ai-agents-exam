@@ -1,0 +1,10 @@
+langgraph
+langgraph-checkpoint-sqlite
+langchain-core
+langchain-openai
+pydantic>=2
+streamlit
+python-dotenv
+reportlab
+pytest
+ruff

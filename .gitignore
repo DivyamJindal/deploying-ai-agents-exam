@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+wheels/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+credentials.json
+*_secret*
+*_token*
+
+# LangGraph / SQLite checkpointer artifacts
+*.sqlite
+*.sqlite3
+*.db
+checkpoints/
+.langgraph/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+nosetests.xml
+coverage.xml
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Generated PNG (we ship the SVG; PNG is only generated when network allows)
+assets/support_escalator_graph.png
+
+# Logs
+*.log
+logs/
+
+# Cursor / agent scratch
+.cursor/

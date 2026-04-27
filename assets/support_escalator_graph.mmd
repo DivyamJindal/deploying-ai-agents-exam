@@ -1,0 +1,31 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	classifier(classifier)
+	sentiment_monitor(sentiment_monitor)
+	bug_solver(bug_solver)
+	billing_solver(billing_solver)
+	feature_solver(feature_solver)
+	general_solver(general_solver)
+	escalation_gate(escalation_gate)
+	response_composer(response_composer)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> classifier;
+	billing_solver --> escalation_gate;
+	bug_solver --> escalation_gate;
+	classifier --> sentiment_monitor;
+	escalation_gate --> response_composer;
+	feature_solver --> escalation_gate;
+	general_solver --> escalation_gate;
+	sentiment_monitor -. &nbsp;billing&nbsp; .-> billing_solver;
+	sentiment_monitor -. &nbsp;bug&nbsp; .-> bug_solver;
+	sentiment_monitor -. &nbsp;feature&nbsp; .-> feature_solver;
+	sentiment_monitor -. &nbsp;general&nbsp; .-> general_solver;
+	response_composer --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

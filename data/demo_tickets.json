@@ -1,0 +1,5 @@
+[
+  {"title":"Password reset","account_id":"acct_1001","customer_email":"ops@apex.example","message":"Hi, how do I reset my password? I cannot find the option."},
+  {"title":"Duplicate billing charge","account_id":"acct_1002","customer_email":"finance@beacon.example","message":"I was charged twice this month. Please refund the extra charge."},
+  {"title":"Angry upload bug","account_id":"acct_1001","customer_email":"ceo@apex.example","message":"This is my third email and nobody is helping!!! Uploads keep failing and your product is blocking my launch. I want this escalated now."}
+]

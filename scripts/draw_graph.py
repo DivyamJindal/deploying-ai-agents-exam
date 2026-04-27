@@ -1,0 +1,42 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from support_escalator.graph import build_graph
+
+ROOT = Path(__file__).resolve().parents[1]
+ASSETS = ROOT / "assets"
+ASSETS.mkdir(exist_ok=True)
+
+SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="620" viewBox="0 0 1080 620">
+  <style>
+    .box { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 12; }
+    .gate { fill: #fff7ed; stroke: #c2410c; stroke-width: 2; rx: 12; }
+    .text { font: 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; text-anchor: middle; }
+    .small { font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; text-anchor: middle; }
+    .line { stroke: #475569; stroke-width: 2; marker-end: url(#arrow); fill: none; }
+  </style>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#475569" /></marker></defs>
+  <rect class="box" x="430" y="25" width="220" height="58"/><text class="text" x="540" y="59">classifier</text>
+  <rect class="box" x="410" y="120" width="260" height="58"/><text class="text" x="540" y="154">sentiment_monitor</text>
+  <rect class="box" x="70" y="250" width="190" height="58"/><text class="text" x="165" y="284">bug_solver</text>
+  <rect class="box" x="310" y="250" width="190" height="58"/><text class="text" x="405" y="284">billing_solver</text>
+  <rect class="box" x="550" y="250" width="190" height="58"/><text class="text" x="645" y="284">feature_solver</text>
+  <rect class="box" x="790" y="250" width="190" height="58"/><text class="text" x="885" y="284">general_solver</text>
+  <rect class="gate" x="390" y="390" width="300" height="68"/><text class="text" x="540" y="418">escalation_gate</text><text class="small" x="540" y="440">interrupts for supervisor</text>
+  <rect class="box" x="405" y="520" width="270" height="58"/><text class="text" x="540" y="554">response_composer</text>
+  <path class="line" d="M540 83 V120"/><path class="line" d="M520 178 C460 210 230 210 165 250"/><path class="line" d="M535 178 C500 215 430 215 405 250"/><path class="line" d="M545 178 C580 215 625 215 645 250"/><path class="line" d="M560 178 C640 210 815 210 885 250"/>
+  <path class="line" d="M165 308 C210 360 410 350 470 390"/><path class="line" d="M405 308 C420 345 460 360 505 390"/><path class="line" d="M645 308 C630 345 600 360 570 390"/><path class="line" d="M885 308 C820 365 670 355 610 390"/><path class="line" d="M540 458 V520"/>
+</svg>
+"""
+
+if __name__ == "__main__":
+    graph = build_graph()
+    (ASSETS / "support_escalator_graph.mmd").write_text(graph.get_graph().draw_mermaid())
+    (ASSETS / "support_escalator_graph.svg").write_text(SVG)
+    try:
+        png = graph.get_graph().draw_mermaid_png()
+        (ASSETS / "support_escalator_graph.png").write_bytes(png)
+        print("Wrote assets/support_escalator_graph.png, .svg, and .mmd")
+    except Exception as exc:
+        print(f"PNG render unavailable ({exc.__class__.__name__}); wrote SVG and Mermaid source.")

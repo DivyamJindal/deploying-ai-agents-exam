@@ -1,0 +1,7 @@
+[
+  {"id":"kb_password_reset","category":"general","title":"Reset your password","body":"Users can reset passwords from Settings > Security > Reset password. If SSO is enabled, redirect them to their identity provider.","tags":["password","login","reset","security"]},
+  {"id":"kb_invoice_double_charge","category":"billing","title":"Duplicate charge workflow","body":"If a duplicate charge is confirmed, apologise, explain the duplicate invoice ID, and offer a refund or account credit. Refunds over $200 require supervisor approval.","tags":["charged","invoice","refund","billing","double"]},
+  {"id":"kb_bug_upload_failure","category":"bug","title":"Upload failure known issue","body":"File uploads larger than 100MB may fail on older workspaces. Ask for workspace ID, file size, timestamp, and browser console screenshot. Known incident MC-231 is under engineering review.","tags":["bug","upload","error","file","crash"]},
+  {"id":"kb_feature_exports","category":"feature","title":"CSV export availability","body":"CSV export is available on Pro and Enterprise plans from Reports > Export. Starter users can export summaries but not raw row-level data.","tags":["feature","export","csv","reports"]},
+  {"id":"kb_billing_proration","category":"billing","title":"Proration policy","body":"Plan upgrades are charged immediately on a prorated basis. Downgrades apply at the next billing cycle unless support grants an exception.","tags":["billing","proration","upgrade","downgrade"]}
+]

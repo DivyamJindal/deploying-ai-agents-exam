@@ -1,0 +1,5 @@
+[
+  {"account_id":"acct_1001","customer_name":"Apex Studio","plan":"Enterprise","mrr":2400,"last_invoice_amount":2400,"duplicate_charge":false,"eligible_refund":0},
+  {"account_id":"acct_1002","customer_name":"Beacon Retail","plan":"Pro","mrr":499,"last_invoice_amount":998,"duplicate_charge":true,"eligible_refund":499},
+  {"account_id":"acct_1003","customer_name":"Cedar Labs","plan":"Starter","mrr":49,"last_invoice_amount":49,"duplicate_charge":false,"eligible_refund":0}
+]
