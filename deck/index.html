@@ -82,18 +82,20 @@
       line-height: 1.05;
       margin: 0 0 0.6em 0;
     }
-    .reveal h1 { font-size: 4.2rem; font-weight: 700; }
-    .reveal h2 { font-size: 2.6rem; }
-    .reveal h3 { font-size: 1.6rem; color: var(--blue-2); font-weight: 500; }
-    .reveal p { font-size: 1.25rem; color: var(--ink-2); line-height: 1.55; }
-    .reveal li { color: var(--ink-2); margin: 0.35em 0; font-size: 1.15rem; }
+    .reveal h1 { font-size: 4.4rem; font-weight: 700; }
+    .reveal h2 { font-size: 3.0rem; }
+    .reveal h3 { font-size: 1.75rem; color: var(--blue-2); font-weight: 500; }
+    .reveal p { font-size: 1.45rem; color: var(--ink); line-height: 1.5; }
+    .reveal li { color: var(--ink); margin: 0.4em 0; font-size: 1.32rem; line-height: 1.45; }
+    .reveal strong { color: var(--ink); }
+    .reveal em { color: var(--ink); }
     .reveal code, .reveal pre {
       font-family: "JetBrains Mono", monospace;
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       color: var(--accent);
       background: rgba(79, 125, 255, 0.08);
       border-radius: 6px;
-      padding: 2px 7px;
+      padding: 2px 8px;
     }
     .reveal pre {
       background: linear-gradient(180deg, #0a1130 0%, #060a1a 100%);
@@ -104,17 +106,21 @@
     }
     .reveal a { color: var(--blue-2); }
 
-    /* Eyebrow / kicker */
+    /* Eyebrow / kicker — explicit rubric-segment label */
     .kicker {
       font-family: "JetBrains Mono", monospace;
-      font-size: 0.78rem;
+      font-size: 0.95rem;
       letter-spacing: 0.18em;
       color: var(--blue-2);
       text-transform: uppercase;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 18px;
+      margin-bottom: 22px;
+      padding: 6px 12px;
+      border: 1px solid rgba(79, 125, 255, 0.35);
+      border-radius: 999px;
+      background: rgba(79, 125, 255, 0.08);
     }
     .kicker::before {
       content: "";
@@ -276,10 +282,19 @@
     }
 
     /* Lines / list with mono labels */
-    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--line); gap: 16px; }
     .stat-row:last-child { border-bottom: 0; }
-    .stat-row .k { font-family: "JetBrains Mono", monospace; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); }
-    .stat-row .v { font-family: "JetBrains Mono", monospace; color: var(--ink); }
+    .stat-row .k { font-family: "JetBrains Mono", monospace; font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+    .stat-row .v { font-family: "JetBrains Mono", monospace; color: var(--ink); font-size: 1.05rem; }
+
+    /* SVG state diagram panel — light card on dark deck */
+    .svg-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+    }
+    .svg-card svg { width: 100%; height: auto; display: block; }
 
     /* Reveal print fix for navy bg */
     .reveal .slides section.has-light-background { background: var(--bg); }
@@ -312,20 +327,25 @@
       <section data-state="title">
         <div class="title-stage">
           <div>
-            <span class="kicker">UGDSAI 29 · Problem 9 · Take-home</span>
+            <span class="kicker">UGDSAI 29 · Problem 9 · End-Term</span>
             <h1>
               Support<span class="accent">Escalator.</span>
             </h1>
-            <p style="font-size:1.4rem; color: var(--ink-2); margin-top: 14px; max-width: 540px;">
-              A LangGraph agent that resolves routine support tickets autonomously and escalates risky ones to a human — with persistent state, sentiment-aware routing, and a real LLM in the loop.
+            <p style="font-size:1.55rem; color: var(--ink); margin-top: 16px; max-width: 580px;">
+              A LangGraph agent for Mosaic Cloud that resolves routine SaaS tickets
+              autonomously and pauses for a human supervisor on the risky ones —
+              persistent state, sentiment-aware routing, real LLM in the loop.
             </p>
             <div class="title-meta">
               <span class="pill blue">LangGraph</span>
               <span class="pill blue">Pydantic v2</span>
               <span class="pill blue">Streamlit</span>
-              <span class="pill ok">⚡ gpt-4.1-nano</span>
+              <span class="pill ok">gpt-4.1-nano</span>
               <span class="pill warn">SqliteSaver</span>
             </div>
+            <p style="margin-top: 28px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--ink-2);">
+              Pattern: Human-in-the-Loop + Conditional Routing &nbsp;·&nbsp; 8 min talk + 2 min Q&amp;A
+            </p>
           </div>
           <div class="orb-wrap">
             <canvas id="orb"></canvas>
@@ -333,31 +353,33 @@
         </div>
       </section>
 
-      <!-- ============================== PROBLEM ============================== -->
+      <!-- ============================== SEGMENT 1 — PROBLEM FRAMING (1 min) ============================== -->
       <section>
-        <span class="kicker">01 · Problem</span>
+        <span class="kicker">Segment 1 · 1 min · Problem framing</span>
         <h2>Mosaic Cloud handles 2,000+ tickets / day.</h2>
-        <p style="max-width: 800px;">
-          Most are routine. A small fraction are <em style="color: var(--bad); font-style: normal;">risky</em> — refunds, churn signals, hard bugs.
-          Routing them all through humans is slow. Routing them all through one LLM is unsafe.
+        <p style="max-width: 920px;">
+          <strong>User:</strong> first-line support ops manager. <strong>Today:</strong> ~40 % auto-resolved.
+          The rest go to humans regardless of risk — wasting agents on routine work and
+          arriving late on the tickets that actually matter.
         </p>
 
         <div class="grid cols-4" style="margin-top: 36px;">
           <div class="kpi"><div class="num">2,000<span class="unit">/day</span></div><div class="label">Inbound tickets</div></div>
-          <div class="kpi"><div class="num">68<span class="unit">%</span></div><div class="label">Routine (auto-resolvable)</div></div>
+          <div class="kpi"><div class="num">75<span class="unit">%</span></div><div class="label">Auto-resolution target</div></div>
           <div class="kpi"><div class="num">22<span class="unit">%</span></div><div class="label">Need supervisor</div></div>
-          <div class="kpi"><div class="num">$48k<span class="unit">/mo</span></div><div class="label">Avg refund exposure</div></div>
+          <div class="kpi"><div class="num">$48k<span class="unit">/mo</span></div><div class="label">Refund exposure</div></div>
         </div>
 
-        <p style="margin-top: 28px; max-width: 780px;">
-          The goal isn't just <em>answer faster</em>. It's <em>route correctly</em>, <em>pause safely</em>,
-          and <em>resume from where the human left off</em>.
+        <p style="margin-top: 30px; max-width: 920px;">
+          <strong>KPIs we move:</strong> auto-resolution rate (40 % → 75 %),
+          mean time to resolution (minutes → seconds), CSAT for frustrated customers
+          (escalate earlier with full context), refund leakage (every refund &gt; $200 hits a human).
         </p>
       </section>
 
-      <!-- ============================== WHY LANGGRAPH ============================== -->
+      <!-- ============================== SEGMENT 2 — ARCHITECTURE WALKTHROUGH (2 min) — pt 1/3 ============================== -->
       <section>
-        <span class="kicker">02 · Architecture choice</span>
+        <span class="kicker">Segment 2 · 2 min · Architecture — pattern choice</span>
         <h2>Why LangGraph, not a single chatbot.</h2>
 
         <div class="grid cols-2" style="margin-top: 28px;">
@@ -372,105 +394,117 @@
             </ul>
           </div>
           <div class="panel" style="border-color: rgba(95,255,167,0.35); box-shadow: 0 0 40px rgba(95,255,167,0.05);">
-            <h3 style="color: var(--ok);">LangGraph</h3>
+            <h3 style="color: var(--ok);">LangGraph (this build)</h3>
             <ul>
-              <li>Explicit nodes for classify / solve / monitor / escalate</li>
-              <li><code>interrupt()</code> pauses and persists waiting for the human</li>
+              <li>Explicit nodes — classify / solve / monitor / escalate</li>
+              <li><code>interrupt()</code> pauses + persists waiting for the human</li>
               <li><code>SqliteSaver</code> checkpoints survive process restarts</li>
               <li><code>Command(resume=…)</code> picks up at the exact node</li>
-              <li>Pydantic <code>SupportState</code> = one schema, one source of truth</li>
+              <li>Pydantic <code>SupportState</code> — one schema, one source of truth</li>
             </ul>
           </div>
         </div>
 
-        <p style="margin-top: 28px; color: var(--ink); font-size: 1.15rem;">
-          <span class="pill blue">key insight</span>
-          &nbsp; The interesting work isn't the LLM call. It's the <em>orchestration</em> around it.
+        <p style="margin-top: 28px;">
+          <span class="pill blue">required pattern</span>
+          &nbsp; Human-in-the-Loop + Conditional Routing — the rubric's most-asked combination.
         </p>
       </section>
 
-      <!-- ============================== ARCHITECTURE / 3D GRAPH ============================== -->
+      <!-- ============================== SEGMENT 2 — pt 2/3 — STATE DIAGRAM (rubric-required) ============================== -->
       <section>
-        <span class="kicker">03 · Architecture</span>
-        <h2>The graph, live.</h2>
+        <span class="kicker">Segment 2 · 2 min · Architecture — state diagram</span>
+        <h2>The graph, generated from <code>graph.get_graph()</code>.</h2>
 
-        <div class="graph-stage">
+        <div style="display: grid; grid-template-columns: 1.35fr 1fr; gap: 28px; margin-top: 18px; align-items: stretch;">
+          <div class="svg-card">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620">
+              <style>
+                .box { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 12; }
+                .gate { fill: #fff7ed; stroke: #c2410c; stroke-width: 2; rx: 12; }
+                .text { font: 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; text-anchor: middle; font-weight: 500; }
+                .small { font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; text-anchor: middle; }
+                .line { stroke: #475569; stroke-width: 2; marker-end: url(#arrow-deck); fill: none; }
+              </style>
+              <defs><marker id="arrow-deck" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#475569" /></marker></defs>
+              <rect class="box" x="430" y="25" width="220" height="58"/><text class="text" x="540" y="59">classifier</text>
+              <rect class="box" x="410" y="120" width="260" height="58"/><text class="text" x="540" y="154">sentiment_monitor</text>
+              <rect class="box" x="70" y="250" width="190" height="58"/><text class="text" x="165" y="284">bug_solver</text>
+              <rect class="box" x="310" y="250" width="190" height="58"/><text class="text" x="405" y="284">billing_solver</text>
+              <rect class="box" x="550" y="250" width="190" height="58"/><text class="text" x="645" y="284">feature_solver</text>
+              <rect class="box" x="790" y="250" width="190" height="58"/><text class="text" x="885" y="284">general_solver</text>
+              <rect class="gate" x="390" y="390" width="300" height="68"/><text class="text" x="540" y="418">escalation_gate</text><text class="small" x="540" y="440">interrupt() for supervisor</text>
+              <rect class="box" x="405" y="520" width="270" height="58"/><text class="text" x="540" y="554">response_composer</text>
+              <path class="line" d="M540 83 V120"/>
+              <path class="line" d="M520 178 C460 210 230 210 165 250"/>
+              <path class="line" d="M535 178 C500 215 430 215 405 250"/>
+              <path class="line" d="M545 178 C580 215 625 215 645 250"/>
+              <path class="line" d="M560 178 C640 210 815 210 885 250"/>
+              <path class="line" d="M165 308 C210 360 410 350 470 390"/>
+              <path class="line" d="M405 308 C420 345 460 360 505 390"/>
+              <path class="line" d="M645 308 C630 345 600 360 570 390"/>
+              <path class="line" d="M885 308 C820 365 670 355 610 390"/>
+              <path class="line" d="M540 458 V520"/>
+            </svg>
+            <p style="margin: 12px 4px 0; font-size: 0.95rem; color: #475569; text-align: center;">
+              Committed at <code style="color:#1e293b;">assets/support_escalator_graph.svg</code> · also rendered live in the Streamlit <strong>Architecture</strong> tab.
+            </p>
+          </div>
           <div>
             <div class="panel" style="height: 100%;">
               <div class="stat-row"><span class="k">classifier</span><span class="v">→ category</span></div>
-              <div class="stat-row"><span class="k">sentiment_monitor</span><span class="v">→ score 0..1</span></div>
-              <div class="stat-row"><span class="k">{bug,billing,feature,general}_solver</span><span class="v">→ ResolutionAttempt</span></div>
+              <div class="stat-row"><span class="k">sentiment_monitor</span><span class="v">→ 0–1 score</span></div>
+              <div class="stat-row"><span class="k">4 solvers</span><span class="v">conditional edge by category</span></div>
               <div class="stat-row"><span class="k">escalation_gate</span><span class="v" style="color: var(--warn);">interrupt()</span></div>
               <div class="stat-row"><span class="k">supervisor</span><span class="v">human-in-the-loop</span></div>
               <div class="stat-row"><span class="k">response_composer</span><span class="v">→ final_response</span></div>
 
-              <div style="margin-top: 22px;">
-                <span class="pill ok">⚡ classifier &amp; sentiment use gpt-4.1-nano</span>
-              </div>
-              <div style="margin-top: 10px;">
+              <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 10px;">
+                <span class="pill ok">classifier + sentiment → gpt-4.1-nano (rule-based fallback)</span>
                 <span class="pill warn">interrupts persist via SqliteSaver</span>
-              </div>
-              <div class="graph-legend" style="margin-top: 22px;">
-                <div><span class="legend-dot" style="background: #4f7dff;"></span>routing node</div>
-                <div><span class="legend-dot" style="background: #00e0ff;"></span>solver</div>
-                <div><span class="legend-dot" style="background: #ffb454;"></span>gate / interrupt</div>
-                <div><span class="legend-dot" style="background: #5fffa7;"></span>terminal</div>
+                <span class="pill blue">conditional routing + HITL — both required patterns</span>
               </div>
             </div>
           </div>
-          <div id="graph3d"></div>
         </div>
-        <p style="margin-top: 14px; color: var(--ink-2); font-size: 0.95rem;">
-          Drag · zoom · click any node to follow its outgoing edges. The same SVG renders inside the Streamlit app's <strong>Architecture</strong> tab.
-        </p>
       </section>
 
-      <!-- ============================== STATE SCHEMA ============================== -->
+      <!-- ============================== SEGMENT 2 — pt 3/3 — STATE SCHEMA ============================== -->
       <section>
-        <span class="kicker">04 · State</span>
+        <span class="kicker">Segment 2 · 2 min · Architecture — typed state</span>
         <h2>One Pydantic schema, end to end.</h2>
 
-        <div class="grid cols-2" style="margin-top: 22px; align-items: stretch;">
+        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; margin-top: 18px; align-items: stretch;">
           <div>
             <pre><code class="language-python">class SupportState(BaseModel):
     ticket: TicketInput
-    category: TicketCategory | None = None
+    category: Literal['bug','billing','feature','general'] | None = None
     resolution_attempts: list[ResolutionAttempt] = []
     sentiment_score: float = 0.0
     escalation_reason: str | None = None
     supervisor_input: str | None = None
     final_response: str | None = None
     ticket_metadata: dict[str, str] = {}</code></pre>
-
-            <p style="margin-top: 18px; font-size: 1rem;">
+            <p style="margin-top: 18px;">
               Every node returns a <em>partial</em> state dict. LangGraph merges. Pydantic validates.
-              The UI never sees a raw <code>__interrupt__</code> tuple it can't render.
+              <code>category</code> is a <code>Literal</code> — invalid transitions can't compile.
+            </p>
+            <p style="margin-top: 14px;">
+              <span class="pill ok">17 / 17 tests · graph + UI normalization + LLM fallback + checkpoint resume</span>
             </p>
           </div>
-          <div class="panel">
-            <h3>The normalization layer</h3>
-            <p style="font-size: 1rem;">
-              Streamlit can receive a Pydantic model, a dict, or a LangGraph <code>Interrupt</code>.
-              <code>ui_state.to_plain()</code> recursively converts <em>anything</em> into JSON-safe primitives.
-            </p>
-            <pre style="margin-top: 12px;"><code class="language-python">def to_plain(obj):
-    if isinstance(obj, BaseModel):
-        return to_plain(obj.model_dump())
-    if isinstance(obj, dict):
-        return {k: to_plain(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
-        return [to_plain(x) for x in obj]
-    return obj</code></pre>
-            <p style="margin-top: 12px; font-size: 0.95rem; color: var(--ink-2);">
-              Killed the <code>'ResolutionAttempt' object is not subscriptable</code> bug for good. <span class="pill ok">17 / 17 tests</span>
+          <div>
+            <div id="graph3d" style="height: 60vh; min-height: 380px;"></div>
+            <p style="margin-top: 10px; text-align: center; color: var(--ink-2); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+              Live 3D: drag to rotate the same graph the SVG above shows
             </p>
           </div>
         </div>
       </section>
 
-      <!-- ============================== DEMO 1 ============================== -->
+      <!-- ============================== SEGMENT 3 — DEMO (3 min, pre-recorded) — pt 1/3 ============================== -->
       <section>
-        <span class="kicker">05 · Demo path 1</span>
+        <span class="kicker">Segment 3 · 3 min · Demo (pre-recorded) — Path 1 / 3</span>
         <h2>Auto-resolution. Never sees a human.</h2>
 
         <div class="grid cols-2" style="margin-top: 24px;">
@@ -502,9 +536,9 @@
         </div>
       </section>
 
-      <!-- ============================== DEMO 2 ============================== -->
+      <!-- ============================== SEGMENT 3 — DEMO pt 2/3 ============================== -->
       <section>
-        <span class="kicker">06 · Demo path 2</span>
+        <span class="kicker">Segment 3 · 3 min · Demo (pre-recorded) — Path 2 / 3</span>
         <h2>Refund above threshold → human-in-the-loop.</h2>
 
         <div class="grid cols-2" style="margin-top: 24px;">
@@ -536,9 +570,9 @@
         </div>
       </section>
 
-      <!-- ============================== DEMO 3 ============================== -->
+      <!-- ============================== SEGMENT 3 — DEMO pt 3/3 ============================== -->
       <section>
-        <span class="kicker">07 · Demo path 3</span>
+        <span class="kicker">Segment 3 · 3 min · Demo (pre-recorded) — Path 3 / 3</span>
         <h2>Sentiment escalation. Tone, not topic.</h2>
 
         <div class="grid cols-2" style="margin-top: 24px;">
@@ -568,9 +602,9 @@
         </div>
       </section>
 
-      <!-- ============================== KPIs ============================== -->
+      <!-- ============================== SEGMENT 4 — KPIs, EDGE CASES, LEARNINGS (1.5 min) — pt 1/3 ============================== -->
       <section>
-        <span class="kicker">08 · Business impact</span>
+        <span class="kicker">Segment 4 · 1.5 min · KPIs &amp; business impact</span>
         <h2>KPIs visible in the dashboard, live.</h2>
 
         <div class="grid cols-4" style="margin-top: 28px;">
@@ -602,88 +636,99 @@
         </div>
       </section>
 
-      <!-- ============================== EDGE CASES ============================== -->
+      <!-- ============================== SEGMENT 4 — pt 2/3 — EDGE CASES + WHAT BROKE & HOW WE FIXED ============================== -->
       <section>
-        <span class="kicker">09 · Edge cases</span>
-        <h2>What the graph handles by design.</h2>
+        <span class="kicker">Segment 4 · 1.5 min · Edge cases + what broke &amp; how we fixed</span>
+        <h2>The interesting failures.</h2>
 
-        <div class="grid cols-3" style="margin-top: 28px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 22px;">
           <div class="panel">
-            <h3 style="color: var(--warn);">Missing account</h3>
-            <p style="font-size: 1rem;">Solver attempt records the gap, gate inspects, supervisor decides whether to ask the customer or proceed.</p>
+            <h3 style="color: var(--warn);">Edge cases handled by design</h3>
+            <ul>
+              <li><strong>Missing account</strong> — solver records the gap, gate escalates</li>
+              <li><strong>Unresolved bug</strong> — solver returns <code>resolved=False</code>; gate trips</li>
+              <li><strong>Angry tone</strong> — sentiment ≥ 0.67 always escalates</li>
+              <li><strong>Refund &gt; $200</strong> — hard cap; LLM never auto-fires it</li>
+              <li><strong>Supervisor rejects</strong> — ticket stays <em>open</em>, guidance attached</li>
+              <li><strong>LLM down or no key</strong> — rule-based fallback keeps the graph working</li>
+            </ul>
           </div>
-          <div class="panel">
-            <h3 style="color: var(--warn);">Unresolved bug</h3>
-            <p style="font-size: 1rem;">Solver returns <code>resolved=False</code>. Gate trips. Supervisor sees the diagnosis trail.</p>
-          </div>
-          <div class="panel">
-            <h3 style="color: var(--warn);">Angry tone</h3>
-            <p style="font-size: 1rem;">Sentiment ≥ 0.67 always escalates regardless of category — the cheapest CSAT save we own.</p>
-          </div>
-          <div class="panel">
-            <h3 style="color: var(--warn);">Refund &gt; threshold</h3>
-            <p style="font-size: 1rem;">Hard-coded $200 cap — adjustable via supervisor guidance, never auto-fired by the LLM.</p>
-          </div>
-          <div class="panel">
-            <h3 style="color: var(--warn);">Supervisor rejection</h3>
-            <p style="font-size: 1rem;">Final response includes the rejection guidance and stays <em>open</em>; doesn't auto-resolve.</p>
-          </div>
-          <div class="panel">
-            <h3 style="color: var(--warn);">LLM failure</h3>
-            <p style="font-size: 1rem;">Classifier and sentiment fall back to deterministic rule-based scoring. Demo never breaks.</p>
+          <div class="panel" style="border-color: rgba(255,122,138,0.35);">
+            <h3 style="color: var(--bad);">What broke. How we fixed it.</h3>
+            <ul>
+              <li><strong>Bug:</strong> <code>'ResolutionAttempt' object is not subscriptable</code> in Streamlit. <strong>Fix:</strong> added <code>ui_state.to_plain()</code> normalization layer + regression tests so any Pydantic / dict / Interrupt renders safely.</li>
+              <li><strong>Bug:</strong> demo state lost on every Streamlit rerun. <strong>Fix:</strong> swapped <code>MemorySaver</code> for <code>SqliteSaver</code> with a per-session <code>thread_id</code> the sidebar surfaces.</li>
+              <li><strong>Bug:</strong> Reveal.js painted the deck white over our navy theme. <strong>Fix:</strong> CSS overrides on <code>.reveal-viewport</code>, <code>.reveal .slides</code>, etc. with <code>!important</code>.</li>
+              <li><strong>Bug:</strong> <code>mermaid.ink</code> blocked from sandbox during graph PNG render. <strong>Fix:</strong> committed an authored SVG so the artifact is always present.</li>
+            </ul>
           </div>
         </div>
+
+        <p style="margin-top: 20px;">
+          <span class="pill ok">17 / 17 tests</span>
+          &nbsp;&nbsp;
+          <span class="pill blue">Iron law: every bug we hit ships with a regression test.</span>
+        </p>
       </section>
 
-      <!-- ============================== LEARNINGS ============================== -->
+      <!-- ============================== SEGMENT 5 — CLOSE (0.5 min) ============================== -->
       <section>
-        <span class="kicker">10 · Learnings &amp; next</span>
+        <span class="kicker">Segment 5 · 0.5 min · Close — limitations &amp; what's next</span>
         <h2>What we'd ship next.</h2>
 
         <div class="grid cols-2" style="margin-top: 28px;">
           <div class="panel">
-            <h3>Learnings</h3>
+            <h3>Honest limitations</h3>
             <ul>
-              <li>Routing + interrupts &gt; one big prompt</li>
-              <li>Pydantic + a normalization layer = bug-free UI</li>
-              <li>Persistent checkpoints turn the demo into a real product</li>
-              <li>LLM is a <em>node</em>, not the whole agent</li>
+              <li>KB is a small synthetic corpus — production needs RAG over real docs</li>
+              <li>Single-tenant SQLite checkpointer — Postgres at real scale</li>
+              <li>One supervisor seat — production needs a queue with assignment</li>
+              <li>No SLA enforcement yet — sidebar control wired, logic stubbed</li>
             </ul>
           </div>
           <div class="panel">
             <h3>Next steps</h3>
             <ul>
-              <li>SLA timers — sidebar control already wired</li>
+              <li>SLA timers per category with breach-triggered escalation</li>
               <li>Zendesk webhook adapter (one-way ingest first)</li>
-              <li>Multilingual response drafting</li>
-              <li>CSV / PDF export from the Inbox</li>
-              <li>RAG into the KB for solver grounding</li>
+              <li>Multilingual response drafting via the same LLM node</li>
+              <li>CSV / PDF export from the Inbox for ops audits</li>
+              <li>LangSmith traces for production observability</li>
             </ul>
           </div>
         </div>
 
-        <p style="margin-top: 32px; font-size: 1.15rem; color: var(--ink);">
-          The whole thing runs in &lt;200ms without an LLM, and ~2s with <code>gpt-4.1-nano</code>. The supervisor is the long pole — and that's correct.
+        <p style="margin-top: 28px; font-size: 1.25rem;">
+          End-to-end: &lt;200ms without an LLM, ~2s with <code>gpt-4.1-nano</code>. The supervisor is the long pole — and that's correct.
         </p>
       </section>
 
-      <!-- ============================== Q&A ============================== -->
+      <!-- ============================== SEGMENT 6 — Q&A (2 min) ============================== -->
       <section>
-        <span class="kicker">11 · Q&amp;A</span>
+        <span class="kicker">Segment 6 · 2 min · Q&amp;A</span>
         <h2>Thank you.</h2>
-        <p style="font-size: 1.4rem; max-width: 720px;">
-          The repo is public. The graph is one file. The state is one schema. The supervisor is a real human, not a prompt pretending.
+        <p style="font-size: 1.55rem; max-width: 820px;">
+          The repo is public. The graph is one file. The state is one Pydantic schema.
+          The supervisor is a real human in the loop — not a prompt pretending.
         </p>
 
-        <div style="margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <div style="margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap;">
           <span class="pill blue">github.com/DivyamJindal/deploying-ai-agents-exam</span>
-          <span class="pill ok">17/17 tests</span>
+          <span class="pill ok">17 / 17 tests passing</span>
           <span class="pill blue">streamlit run app.py</span>
+          <span class="pill warn">SqliteSaver checkpoint at checkpoints/se.sqlite</span>
         </div>
 
-        <p style="margin-top: 36px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--ink-2);">
-          Press <code>?</code> for keyboard shortcuts · <code>S</code> for speaker notes
-        </p>
+        <div class="panel" style="margin-top: 32px;">
+          <h3>Likely Q&amp;A targets</h3>
+          <ul>
+            <li><strong>Why this pattern?</strong> Routing and interrupts are both required — categories fan out, escalation is human-gated.</li>
+            <li><strong>What if a node fails?</strong> Partial state is preserved in <code>resolution_attempts</code>; production wraps each solver in retry + escalates unresolved tickets.</li>
+            <li><strong>How does state prevent invalid transitions?</strong> Pydantic <code>Literal</code> on <code>category</code>, structured <code>ResolutionAttempt</code>, normalized via <code>to_plain</code> before the UI.</li>
+            <li><strong>What if the supervisor rejects?</strong> Final response carries the rejection guidance and the ticket stays <em>open</em>.</li>
+            <li><strong>How do you measure auto-resolution?</strong> Analytics tab calls <code>summarize_run</code> over the run history live.</li>
+          </ul>
+        </div>
       </section>
 
     </div>
