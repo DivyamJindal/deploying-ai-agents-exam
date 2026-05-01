@@ -11,7 +11,7 @@ python3 -m http.server 9876 -d deck
 
 ## Public link
 
-Once GitHub Pages is enabled for the repository root on `main`, the deck is available at:
+GitHub Pages deck link:
 
 https://divyamjindal.github.io/deploying-ai-agents-exam/deck/
 
@@ -21,4 +21,4 @@ https://divyamjindal.github.io/deploying-ai-agents-exam/deck/
 python scripts/export_deck_pdf.py
 ```
 
-This writes `deck/SupportEscalator-Group_9.pdf`.
+This writes `deck/SupportEscalator-Group_9.pdf`. For LMS submission, a copy is also saved manually as `/Users/divyamjindal/Downloads/Group_9.pdf`.

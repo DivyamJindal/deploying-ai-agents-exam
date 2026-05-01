@@ -146,10 +146,11 @@ This prototype uses synthetic support data committed in `data/`:
 
 ## Deck Link
 
-Live deck (GitHub Pages, after Pages is enabled): https://divyamjindal.github.io/deploying-ai-agents-exam/deck/
+Live deck (GitHub Pages): https://divyamjindal.github.io/deploying-ai-agents-exam/deck/
 
 PDF deck: `deck/SupportEscalator-Group_9.pdf`
 
 ## Demo Video
 
 Upload the 3-minute recording and replace this placeholder with the unlisted YouTube/Drive link.
+
