@@ -135,22 +135,20 @@ This prototype uses synthetic support data committed in `data/`:
 - **Auto-generated supervisor summary** — escalation_gate constructs a structured payload (ticket, category, sentiment, escalation reason, and auto_resolution) surfaced in the Supervisor tab.
 - Supervisor queue UI, run-history KPIs, Streamlit-native analytics, normalized state layer, dark ticketing-console theme.
 
+## Submission Links
+
+- **Hosted deck:** https://divyamjindal.github.io/deploying-ai-agents-exam/deck/
+- **PDF deck:** `deck/SupportEscalator-Group_9.pdf`
+- **Architecture diagram:** `assets/support_escalator_graph.svg`
+- **Business memo:** `docs/business_memo.md`
+- **Demo script:** `docs/demo_script.md`
+
 ## Team
 
-| Name | Role |
-|------|------|
-| Divyam Jindal | LangGraph architecture, escalation gate, checkpointing |
-| Bhanu Uday | Streamlit UI, analytics workflow, supervisor experience |
-| Ishaan Bansal | LLM classifier/sentiment integration, prompts, evaluation cases |
-| Harman Manik | Test suite, data/KB setup, documentation, presentation support |
-
-## Deck Link
-
-Live deck (GitHub Pages): https://divyamjindal.github.io/deploying-ai-agents-exam/deck/
-
-PDF deck: `deck/SupportEscalator-Group_9.pdf`
-
-## Demo Video
-
-Upload the 3-minute recording and replace this placeholder with the unlisted YouTube/Drive link.
+| Name | Contribution Area |
+|------|-------------------|
+| Divyam Jindal | LangGraph architecture, checkpointing, deployment coordination |
+| Bhanu Uday | Demo flow, business framing, KPI mapping |
+| Ishaan Bansal | Testing, evaluation scenarios, edge cases |
+| Harman Manik | Streamlit UI, analytics, presentation polish |
 
