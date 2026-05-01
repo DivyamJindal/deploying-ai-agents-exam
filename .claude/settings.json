@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PYTHONPATH=src pytest *)",
+      "Bash(PYTHONPATH=src streamlit run *)",
+      "Bash(source .venv/bin/activate *)",
+      "Bash(pip show *)",
+      "Bash(pip list)",
+      "Bash(npx tsc *)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck)",
+      "Bash(vercel whoami)",
+      "Bash(vercel inspect *)",
+      "Bash(vercel ls *)",
+      "Bash(vercel env ls *)",
+      "Bash(lsof -ti:*)",
+      "Bash(curl -s *)",
+      "Bash(curl -sL *)",
+      "Bash(curl -sI *)"
+    ]
+  }
+}

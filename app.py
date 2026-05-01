@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
@@ -189,6 +190,23 @@ div.stButton > button { border-radius: 10px; }
 
 [data-testid="stMetricValue"] { color: var(--text); }
 [data-testid="stMetricLabel"] { color: var(--muted) !important; }
+
+/* Pending-interrupt pulsing alert dot */
+.interrupt-alert {
+  display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--danger); box-shadow: 0 0 6px var(--danger);
+  margin-left: 6px; vertical-align: middle;
+  animation: se-pulse 1.5s ease-in-out infinite;
+}
+@keyframes se-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+/* Elapsed time chip */
+.elapsed { font-size: 11px; color: var(--muted); padding: 2px 8px;
+  border: 1px solid var(--border); border-radius: 999px; }
+
+/* Approve / reject button tones */
+div[data-approve="true"] button { background: linear-gradient(135deg,#34d399,#10b981) !important; color:#06121f !important; }
+div[data-reject="true"]  button { background: linear-gradient(135deg,#f87171,#ef4444) !important; color:#fff !important; }
 </style>
 """
 
@@ -436,12 +454,17 @@ with st.sidebar:
     st.caption("Ops console · LangGraph multi-agent")
 
     st.divider()
-    st.markdown("**Active thread**")
+    interrupt_dot = '<span class="interrupt-alert"></span>' if st.session_state.pending_interrupt else ""
+    st.markdown(f"**Active thread** {interrupt_dot}", unsafe_allow_html=True)
     st.code(st.session_state.thread_id, language="text")
     st.caption("Persisted in `checkpoints/se.sqlite` via SqliteSaver.")
-    if st.button("➕ New ticket thread", use_container_width=True):
-        reset_thread()
-        st.rerun()
+    if st.session_state.pending_interrupt:
+        if st.button("➕ New ticket thread ⚠", use_container_width=True):
+            st.warning("A ticket is awaiting supervisor approval. Resetting will abandon the pending escalation.")
+    else:
+        if st.button("➕ New ticket thread", use_container_width=True):
+            reset_thread()
+            st.rerun()
 
     threads = list_threads()
     if threads:
@@ -493,6 +516,17 @@ with st.sidebar:
         escalated = sum(1 for r in h if r.get("escalation_reason"))
         st.metric("Escalation rate", f"{escalated/len(h)*100:.0f}%")
 
+    st.divider()
+    langsmith_key = os.getenv("LANGCHAIN_API_KEY", "")
+    langsmith_project = os.getenv("LANGCHAIN_PROJECT", "support-escalator")
+    if langsmith_key:
+        st.markdown("**LangSmith tracing**")
+        st.markdown('<span class="badge ok">● Tracing active</span>', unsafe_allow_html=True)
+        trace_url = f"https://smith.langchain.com/projects/{langsmith_project}"
+        st.caption(f"[Open traces ↗]({trace_url})")
+    else:
+        st.caption("Set `LANGCHAIN_API_KEY` in `.env` to enable LangSmith tracing.")
+
 
 # ---------------------------------------------------------------------------
 # Header
@@ -534,10 +568,10 @@ with inbox_tab:
     with left:
         st.markdown('<div class="card"><h4>Ticket Intake</h4></div>', unsafe_allow_html=True)
         with st.form("ticket_form", clear_on_submit=False):
-            title = st.text_input("Title", value=preset["title"])
-            account_id = st.text_input("Account ID", value=preset["account_id"])
+            title = st.text_input("Title", value=preset["title"], help="Short description of the issue")
+            account_id = st.text_input("Account ID", value=preset["account_id"], help="Format: acct_XXXX  (pick from the demo queue)")
             customer_email = st.text_input("Customer email", value=preset["customer_email"])
-            message = st.text_area("Message", value=preset["message"], height=160)
+            message = st.text_area("Message", value=preset["message"], height=160, help="Paste the full customer message here")
             submitted = st.form_submit_button("Run SupportEscalator", type="primary", use_container_width=True)
         if submitted:
             ticket = TicketInput(
@@ -547,14 +581,27 @@ with inbox_tab:
                 message=message,
             )
             initial_state = SupportState(ticket=ticket)
-            with st.spinner("Running graph: classifier → sentiment → solver → escalation gate"):
-                result = st.session_state.graph.invoke(initial_state, config=config())
-            capture_result(result)
-            st.rerun()
+            try:
+                with st.spinner("Running graph: classifier → sentiment → solver → escalation gate"):
+                    result = st.session_state.graph.invoke(initial_state, config=config())
+                capture_result(result)
+                st.rerun()
+            except Exception as exc:
+                st.error(f"Graph execution failed: {exc}")
 
     with right:
         if state:
             score = float(state.get("sentiment_score") or 0.0)
+            created_str = (state.get("ticket") or {}).get("created_at", "")
+            elapsed_html = ""
+            if created_str:
+                try:
+                    created = datetime.fromisoformat(created_str)
+                    elapsed_s = int((datetime.now(timezone.utc) - created).total_seconds())
+                    mins, secs = divmod(elapsed_s, 60)
+                    elapsed_html = f'<div class="row"><span>Elapsed</span><span><span class="elapsed">⏱ {mins}m {secs}s</span></span></div>'
+                except Exception:
+                    pass
             st.markdown(
                 f"""
 <div class="card">
@@ -563,7 +610,9 @@ with inbox_tab:
   <div class="row"><span>Requester</span><span>{(state.get("ticket") or {}).get("customer_email", "—")}</span></div>
   <div class="row"><span>Category</span><span>{category_badge_html(state.get("category"))}</span></div>
   <div class="row"><span>Sentiment</span><span>{sentiment_badge_html(score)}</span></div>
+  <div class="row"><span style="font-size:11px;color:var(--muted);font-style:italic;">scale: 0 = calm · 1 = furious</span></div>
   <div class="row"><span>Status</span><span>{status_badge_html(state)}</span></div>
+  {elapsed_html}
 </div>
 """,
                 unsafe_allow_html=True,
@@ -589,19 +638,22 @@ with inbox_tab:
         with col_b:
             if st.session_state.pending_interrupt:
                 pending = st.session_state.pending_interrupt
+                msg_preview = (pending.get("ticket") or {}).get("message", "")[:280]
                 st.markdown(
                     f"""
 <div class="card" style="border-color: rgba(248,113,113,0.4);">
   <h4>⚠ Awaiting Supervisor Decision</h4>
   <div class="body">
-    <strong>Reason:</strong> {pending.get("escalation_reason", "")}<br/>
+    <strong>Reason:</strong> {pending.get("escalation_reason", "")}<br/><br/>
+    <strong>Customer said:</strong><br/>
+    <em style="color:var(--muted);">"{msg_preview}{"…" if len((pending.get("ticket") or {}).get("message","")) > 280 else ""}"</em><br/><br/>
     <strong>Auto-resolution attempt:</strong> {pending.get("auto_resolution", "")}
   </div>
 </div>
 """,
                     unsafe_allow_html=True,
                 )
-                st.info("Open the **Supervisor** tab to approve or reject the escalation.")
+                st.info("⬆ Open the **Supervisor** tab above to approve or reject the escalation.")
             elif state.get("final_response"):
                 st.markdown('<div class="card"><h4>Final Customer Response</h4></div>', unsafe_allow_html=True)
                 st.markdown(
@@ -659,6 +711,13 @@ with supervisor_tab:
             render_account_card(ticket.get("account_id", ""))
 
         with col_b:
+            orig_msg = (pending.get("ticket") or {}).get("message", "")
+            if orig_msg:
+                st.markdown(
+                    f'<div class="card"><h4>Original Customer Message</h4>'
+                    f'<div class="body" style="font-style:italic;color:var(--muted);">"{orig_msg}"</div></div>',
+                    unsafe_allow_html=True,
+                )
             st.markdown(
                 f"""
 <div class="card">
@@ -671,22 +730,34 @@ with supervisor_tab:
             with st.form("supervisor_form"):
                 approved = st.radio("Decision", ["approve", "reject"], horizontal=True)
                 guidance = st.text_area(
-                    "Supervisor guidance",
+                    "Supervisor guidance (edit or keep the template)",
                     value="Apologise, keep the case open, and route the incident details to the right owner with a same-day follow-up.",
-                    height=140,
+                    height=130,
                 )
                 responder_name = st.text_input("Supervisor name", value="Supervisor A")
-                resume = st.form_submit_button("Resume graph", type="primary", use_container_width=True)
+                if approved == "approve":
+                    st.markdown('<div data-approve="true">', unsafe_allow_html=True)
+                    resume = st.form_submit_button("✓ Approve & Resume", type="primary", use_container_width=True)
+                    st.markdown("</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown('<div data-reject="true">', unsafe_allow_html=True)
+                    resume = st.form_submit_button("✗ Reject & Resume", type="primary", use_container_width=True)
+                    st.markdown("</div>", unsafe_allow_html=True)
             if resume:
                 decision = {
                     "approved": approved == "approve",
                     "guidance": guidance,
                     "responder_name": responder_name,
                 }
-                with st.spinner("Resuming graph with supervisor decision…"):
-                    result = st.session_state.graph.invoke(Command(resume=decision), config=config())
-                capture_result(result)
-                st.rerun()
+                try:
+                    with st.spinner("Resuming graph with supervisor decision…"):
+                        result = st.session_state.graph.invoke(Command(resume=decision), config=config())
+                    capture_result(result)
+                    action = "approved" if decision["approved"] else "rejected"
+                    st.success(f"✓ Decision {action} — graph resumed. Check the Inbox tab for the final response.")
+                    st.rerun()
+                except Exception as exc:
+                    st.error(f"Resume failed: {exc}")
 
         st.markdown(
             f"""
@@ -713,7 +784,7 @@ with analytics_tab:
         for r in history
     )
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
     c1.markdown(
         render_kpi("Tickets handled", str(total), "since session start", "accent"),
         unsafe_allow_html=True,
@@ -729,6 +800,10 @@ with analytics_tab:
     c4.markdown(
         render_kpi("Avg sentiment score", f"{avg_sent:.2f}", "0 = calm · 1 = furious",
                    "danger" if avg_sent >= 0.67 else ("warn" if avg_sent >= 0.34 else "ok")),
+        unsafe_allow_html=True,
+    )
+    c5.markdown(
+        render_kpi("Refund exposure", f"${refund_exposure:,.0f}", "total $ through supervisor", "danger" if refund_exposure > 0 else "ok"),
         unsafe_allow_html=True,
     )
 
@@ -825,7 +900,7 @@ with architecture_tab:
       <li><b>Sentiment monitor</b> — frustration scoring feeds the escalation gate.</li>
       <li><b>Human-in-the-loop</b> — <code>escalation_gate</code> pauses with <code>interrupt()</code>.</li>
       <li><b>Resume</b> — supervisor decision is injected via <code>Command(resume=…)</code>.</li>
-      <li><b>Stateful</b> — Pydantic <code>SupportState</code> with <code>MemorySaver</code> checkpointing.</li>
+      <li><b>Stateful</b> — Pydantic <code>SupportState</code> with <code>SqliteSaver</code> checkpointing (survives restarts).</li>
     </ul>
   </div>
 </div>
