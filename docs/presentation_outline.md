@@ -28,17 +28,17 @@ Run the duplicate-billing demo. The header flips to *Awaiting supervisor*. Switc
 
 Run the angry upload-bug demo. Show the sentiment KPI spike, the unresolved bug attempt, and the supervisor card explaining why we paused. Demonstrate a rejection path to show the response stays open instead of auto-resolving.
 
-## Slide 8: KPIs And Business Impact
+## Slide 8: KPIs, Evaluation, And Business Impact
 
-Show the **Analytics** workspace live: auto-resolution rate KPI, escalations counter, average sentiment, refund exposure, plus charts for category mix, sentiment trend, solver status, and escalation reasons. Tie each one back to a Mosaic Cloud KPI.
+Show the **Analytics** workspace live: auto-resolution rate KPI, escalations counter, average sentiment, refund exposure, plus charts for category mix, sentiment trend, solver status, and escalation reasons. Tie each one back to a Mosaic Cloud KPI, then cite the test evidence: 30/30 tests and 6 representative evaluation scenarios.
 
 ## Slide 9: Edge Cases
 
 Missing account, unresolved bug, angry tone, refund above threshold, supervisor rejection — each visible from the run history sidebar and the resolution timeline.
 
-## Slide 10: Learnings And Next Steps
+## Slide 10: Bonus Coverage, Learnings, And Next Steps
 
-LangGraph makes routing and resumable human review explicit. The normalization layer keeps the demo robust. Next: SLA timers (sidebar control already wired), Zendesk webhook adapter, multilingual response drafting, and CSV/PDF export from the Inbox.
+LangGraph makes routing and resumable human review explicit. The normalization layer keeps the demo robust. Bonus coverage: LangSmith tracing, evaluation framework, prompt iteration documentation, and supervisor-ready escalation summaries. Next: SLA timers, Zendesk webhook adapter, multilingual response drafting, and CSV/PDF export from the Inbox.
 
 ## Q&A Prep
 

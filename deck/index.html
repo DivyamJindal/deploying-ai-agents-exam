@@ -2,924 +2,116 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>SupportEscalator · LangGraph for routine + risky tickets</title>
-
-  <!-- Reveal.js core -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Group 9 - SupportEscalator</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
-
-  <!-- Fonts: supermemory.ai vibe = IBM Plex Sans + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
-    rel="stylesheet"
-  />
-
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #060a1a;
-      --bg-2: #0b1233;
-      --ink: #e6ecff;
-      --ink-2: #a4b1d4;
-      --line: #1c2554;
-      --blue: #4f7dff;
-      --blue-2: #84a4ff;
-      --blue-3: #1f3aa3;
-      --accent: #00e0ff;
-      --warn: #ffb454;
-      --ok: #5fffa7;
-      --bad: #ff7a8a;
-      --grid: rgba(79, 125, 255, 0.07);
+      --navy:#07111f; --panel:#0e1b2f; --panel2:#12243d; --ink:#eef5ff; --muted:#9fb2cf;
+      --line:#24405f; --blue:#3b82f6; --cyan:#38d9ff; --green:#4ade80; --amber:#fbbf24; --red:#fb7185;
+      --paper:#f8fbff; --paper-ink:#102033;
     }
-
-    html, body { background: var(--bg); margin: 0; }
-
-    /* Reveal.js v5 paints these white by default — we want deep navy everywhere. */
-    .reveal-viewport,
-    .reveal,
-    .reveal .slides,
-    .reveal .backgrounds,
-    .reveal .slides > section,
-    .reveal .slides > section > section {
-      background: var(--bg) !important;
-    }
-
-    .reveal {
-      font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--ink);
-      font-weight: 400;
-    }
-
-    /* Subtle grid background — supermemory's signature */
-    .reveal .slides::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(var(--grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-      background-size: 56px 56px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
-      z-index: 0;
-    }
-
-    .reveal .slides section {
-      text-align: left;
-      padding: 4vh 6vw;
-      box-sizing: border-box;
-    }
-
-    .reveal h1, .reveal h2, .reveal h3 {
-      font-family: "IBM Plex Sans", sans-serif;
-      color: var(--ink);
-      letter-spacing: -0.01em;
-      text-transform: none;
-      font-weight: 600;
-      line-height: 1.05;
-      margin: 0 0 0.6em 0;
-    }
-    .reveal h1 { font-size: 4.4rem; font-weight: 700; }
-    .reveal h2 { font-size: 3.0rem; }
-    .reveal h3 { font-size: 1.75rem; color: var(--blue-2); font-weight: 500; }
-    .reveal p { font-size: 1.45rem; color: var(--ink); line-height: 1.5; }
-    .reveal li { color: var(--ink); margin: 0.4em 0; font-size: 1.32rem; line-height: 1.45; }
-    .reveal strong { color: var(--ink); }
-    .reveal em { color: var(--ink); }
-    .reveal code, .reveal pre {
-      font-family: "JetBrains Mono", monospace;
-      font-size: 1.05rem;
-      color: var(--accent);
-      background: rgba(79, 125, 255, 0.08);
-      border-radius: 6px;
-      padding: 2px 8px;
-    }
-    .reveal pre {
-      background: linear-gradient(180deg, #0a1130 0%, #060a1a 100%);
-      border: 1px solid var(--line);
-      padding: 18px 22px;
-      color: var(--ink);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-    }
-    .reveal a { color: var(--blue-2); }
-
-    /* Eyebrow / kicker — explicit rubric-segment label */
-    .kicker {
-      font-family: "JetBrains Mono", monospace;
-      font-size: 0.95rem;
-      letter-spacing: 0.18em;
-      color: var(--blue-2);
-      text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 22px;
-      padding: 6px 12px;
-      border: 1px solid rgba(79, 125, 255, 0.35);
-      border-radius: 999px;
-      background: rgba(79, 125, 255, 0.08);
-    }
-    .kicker::before {
-      content: "";
-      width: 8px; height: 8px; border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 12px var(--accent);
-    }
-
-    /* Pills */
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(79, 125, 255, 0.06);
-      font-family: "JetBrains Mono", monospace;
-      font-size: 0.8rem;
-      color: var(--ink-2);
-    }
-    .pill.ok { color: var(--ok); border-color: rgba(95, 255, 167, 0.35); }
-    .pill.warn { color: var(--warn); border-color: rgba(255, 180, 84, 0.35); }
-    .pill.bad { color: var(--bad); border-color: rgba(255, 122, 138, 0.35); }
-    .pill.blue { color: var(--blue-2); border-color: rgba(79, 125, 255, 0.45); }
-
-    /* Card / panel */
-    .panel {
-      background: linear-gradient(180deg, rgba(11,18,51,0.65) 0%, rgba(6,10,26,0.65) 100%);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 22px 26px;
-      backdrop-filter: blur(8px);
-    }
-
-    .grid {
-      display: grid;
-      gap: 18px;
-    }
-    .grid.cols-2 { grid-template-columns: 1fr 1fr; }
-    .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-    .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
-
-    .kpi {
-      background: linear-gradient(180deg, #0c1638 0%, #060a1a 100%);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 18px 20px;
-      position: relative;
-      overflow: hidden;
-    }
-    .kpi::after {
-      content: "";
-      position: absolute;
-      inset: -1px;
-      border-radius: 14px;
-      pointer-events: none;
-      background: radial-gradient(circle at top right, rgba(79,125,255,0.18), transparent 60%);
-    }
-    .kpi .num {
-      font-family: "JetBrains Mono", monospace;
-      font-size: 2.6rem;
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1;
-      letter-spacing: -0.02em;
-    }
-    .kpi .num .unit { font-size: 1.2rem; color: var(--blue-2); margin-left: 4px; }
-    .kpi .label {
-      font-family: "JetBrains Mono", monospace;
-      font-size: 0.78rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--ink-2);
-      margin-top: 8px;
-    }
-
-    /* TITLE SLIDE — animated orb */
-    .title-stage {
-      min-height: 86vh;
-      display: grid;
-      grid-template-columns: 1.05fr 1fr;
-      align-items: center;
-      gap: 4vw;
-    }
-    .title-stage h1 {
-      font-size: 5rem;
-      line-height: 1;
-      letter-spacing: -0.02em;
-    }
-    .title-stage h1 .accent {
-      background: linear-gradient(90deg, var(--blue-2) 0%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .title-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
-    .orb-wrap {
-      position: relative;
-      width: 100%;
-      height: 70vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #orb { width: 100%; height: 100%; }
-    .orb-wrap::before {
-      content: "";
-      position: absolute;
-      inset: 12% 12%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(79,125,255,0.35) 0%, transparent 60%);
-      filter: blur(40px);
-      z-index: 0;
-    }
-
-    /* Slide footer */
-    .slide-footer {
-      position: fixed;
-      bottom: 18px;
-      left: 0; right: 0;
-      display: flex;
-      justify-content: space-between;
-      padding: 0 32px;
-      font-family: "JetBrains Mono", monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--ink-2);
-      opacity: 0.55;
-      pointer-events: none;
-      z-index: 30;
-    }
-
-    /* 3D graph slide */
-    .graph-stage {
-      display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 28px;
-      height: 70vh;
-    }
-    #graph3d {
-      width: 100%; height: 100%;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      overflow: hidden;
-      background: radial-gradient(ellipse at center, rgba(79,125,255,0.08) 0%, transparent 70%), var(--bg);
-    }
-    .graph-legend {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      font-family: "JetBrains Mono", monospace;
-      font-size: 0.85rem;
-      color: var(--ink-2);
-      margin-top: 12px;
-    }
-    .legend-dot {
-      display: inline-block; width: 10px; height: 10px; border-radius: 50%;
-      margin-right: 8px; vertical-align: middle;
-    }
-
-    /* Lines / list with mono labels */
-    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--line); gap: 16px; }
-    .stat-row:last-child { border-bottom: 0; }
-    .stat-row .k { font-family: "JetBrains Mono", monospace; font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
-    .stat-row .v { font-family: "JetBrains Mono", monospace; color: var(--ink); font-size: 1.05rem; }
-
-    /* SVG state diagram panel — light card on dark deck */
-    .svg-card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 18px 50px rgba(0,0,0,0.45);
-    }
-    .svg-card svg { width: 100%; height: auto; display: block; }
-
-    /* Reveal print fix for navy bg */
-    .reveal .slides section.has-light-background { background: var(--bg); }
-    .reveal .progress { color: var(--blue); }
-
-    /* Hide reveal controls on title */
-    section[data-state="title"] + .reveal__controls { display: none; }
-
-    .architecture-svg { background: var(--bg); border-radius: 12px; padding: 12px; }
-    .architecture-svg svg { width: 100%; height: auto; }
-
-    @media (max-width: 1024px) {
-      .title-stage { grid-template-columns: 1fr; }
-      .orb-wrap { height: 40vh; }
-      .graph-stage { grid-template-columns: 1fr; height: auto; }
-      #graph3d { height: 50vh; }
-    }
+    html,body{background:var(--navy);margin:0;}
+    .reveal-viewport,.reveal,.reveal .slides,.reveal .backgrounds,.reveal .slides>section{background:var(--navy)!important;}
+    .reveal{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);}
+    .reveal .slides section{box-sizing:border-box;text-align:left;padding:58px 78px;}
+    .reveal .slides:before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(56,217,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(56,217,255,.045) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(circle at 50% 10%,black 0,transparent 72%);pointer-events:none;}
+    h1,h2,h3{margin:0;color:var(--ink);letter-spacing:-.02em;text-transform:none!important;line-height:1.04;font-weight:700;}
+    h1{font-size:4.4rem;} h2{font-size:3.05rem;} h3{font-size:1.45rem;color:#b8d0ff;}
+    p,li{font-size:1.22rem;line-height:1.42;color:var(--ink);} li{margin:.34em 0;} ul,ol{padding-left:1.2em;}
+    code{font-family:"JetBrains Mono",monospace;color:var(--cyan);background:rgba(56,217,255,.08);border-radius:6px;padding:1px 6px;font-size:.9em;}
+    .eyebrow{display:inline-flex;gap:10px;align-items:center;font-family:"JetBrains Mono",monospace;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#b8d0ff;border:1px solid rgba(59,130,246,.35);background:rgba(59,130,246,.08);padding:8px 12px;border-radius:999px;margin-bottom:22px;}
+    .eyebrow:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);}
+    .sub{color:var(--muted);font-size:1.12rem;} .mono{font-family:"JetBrains Mono",monospace;}
+    .pill{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:7px 12px;color:#cfe0ff;background:rgba(59,130,246,.08);font-family:"JetBrains Mono",monospace;font-size:.82rem;margin:4px 6px 4px 0;}
+    .pill.ok{border-color:rgba(74,222,128,.45);color:#baf7cd;background:rgba(74,222,128,.08)} .pill.warn{border-color:rgba(251,191,36,.5);color:#ffe3a3;background:rgba(251,191,36,.08)}
+    .panel{background:linear-gradient(180deg,rgba(18,36,61,.92),rgba(10,22,38,.92));border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:0 18px 46px rgba(0,0,0,.28);} 
+    .grid{display:grid;gap:20px}.cols2{grid-template-columns:1fr 1fr}.cols3{grid-template-columns:repeat(3,1fr)}.cols4{grid-template-columns:repeat(4,1fr)}
+    .metric{border:1px solid var(--line);border-radius:16px;padding:18px 20px;background:linear-gradient(180deg,#10223b,#081421)} .metric .num{font-family:"JetBrains Mono",monospace;font-size:2.6rem;font-weight:700;color:var(--ink);line-height:1}.metric .lab{font-family:"JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-size:.78rem;margin-top:8px}.metric .note{font-size:.86rem;color:var(--muted);margin-top:7px;line-height:1.3}
+    .flow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:28px}.node{position:relative;min-height:104px;border:1px solid rgba(59,130,246,.36);border-radius:14px;padding:14px;background:rgba(18,36,61,.82)}.node:after{content:"";position:absolute;top:50%;right:-11px;width:18px;height:2px;background:var(--cyan)}.node:last-child:after{display:none}.node .n{font-family:"JetBrains Mono",monospace;color:var(--cyan);font-size:.72rem;letter-spacing:.12em}.node .t{font-size:1rem;font-weight:700;margin-top:8px}.node .d{font-size:.78rem;color:var(--muted);margin-top:7px;line-height:1.35}.node.hot{border-color:rgba(251,191,36,.55);box-shadow:inset 0 0 24px rgba(251,191,36,.06)}
+    .table{width:100%;border-collapse:collapse;font-size:1rem}.table th{font-family:"JetBrains Mono",monospace;color:#b8d0ff;font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;text-align:left;border-bottom:1px solid var(--line);padding:10px}.table td{border-bottom:1px solid rgba(36,64,95,.7);padding:11px 10px;color:var(--ink);vertical-align:top}.table .muted{color:var(--muted)}
+    .diagram{background:var(--paper);border-radius:18px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35)} .diagram svg{width:100%;height:auto;display:block}.diagram p{color:#46576e;font-size:.82rem;text-align:center;margin:8px 0 0}
+    .quote{border-left:4px solid var(--cyan);padding-left:18px;color:#cfe0ff;font-size:1.32rem;}
+    .footer{position:fixed;left:0;right:0;bottom:18px;display:flex;justify-content:space-between;padding:0 34px;font-family:"JetBrains Mono",monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(207,224,255,.55);z-index:20;}
+    @media(max-width:1100px){.cols4,.cols3,.cols2,.flow{grid-template-columns:1fr}.reveal .slides section{padding:42px}.node:after{display:none}}
   </style>
 </head>
 <body>
-  <div class="slide-footer">
-    <span>SupportEscalator · LangGraph + LLM</span>
-    <span>Mosaic Cloud · UGDSAI 29</span>
-  </div>
-
-  <div class="reveal">
-    <div class="slides">
-
-      <!-- ============================== TITLE ============================== -->
-      <section data-state="title">
-        <div class="title-stage">
-          <div>
-            <span class="kicker">UGDSAI 29 · Problem 9 · End-Term</span>
-            <h1>
-              Support<span class="accent">Escalator.</span>
-            </h1>
-            <p style="font-size:1.55rem; color: var(--ink); margin-top: 16px; max-width: 580px;">
-              A LangGraph agent for Mosaic Cloud that resolves routine SaaS tickets
-              autonomously and pauses for a human supervisor on the risky ones —
-              persistent state, sentiment-aware routing, real LLM in the loop.
-            </p>
-            <div class="title-meta">
-              <span class="pill blue">LangGraph</span>
-              <span class="pill blue">Pydantic v2</span>
-              <span class="pill blue">Streamlit</span>
-              <span class="pill ok">gpt-4.1-nano</span>
-              <span class="pill warn">SqliteSaver</span>
-            </div>
-            <p style="margin-top: 28px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--ink-2);">
-              Pattern: Human-in-the-Loop + Conditional Routing &nbsp;·&nbsp; 8 min talk + 2 min Q&amp;A
-            </p>
-          </div>
-          <div class="orb-wrap">
-            <canvas id="orb"></canvas>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================== SEGMENT 1 — PROBLEM FRAMING (1 min) ============================== -->
-      <section>
-        <span class="kicker">Segment 1 · 1 min · Problem framing</span>
-        <h2>Mosaic Cloud handles 2,000+ tickets / day.</h2>
-        <p style="max-width: 920px;">
-          <strong>User:</strong> first-line support ops manager. <strong>Today:</strong> ~40 % auto-resolved.
-          The rest go to humans regardless of risk — wasting agents on routine work and
-          arriving late on the tickets that actually matter.
-        </p>
-
-        <div class="grid cols-4" style="margin-top: 36px;">
-          <div class="kpi"><div class="num">2,000<span class="unit">/day</span></div><div class="label">Inbound tickets</div></div>
-          <div class="kpi"><div class="num">75<span class="unit">%</span></div><div class="label">Auto-resolution target</div></div>
-          <div class="kpi"><div class="num">22<span class="unit">%</span></div><div class="label">Need supervisor</div></div>
-          <div class="kpi"><div class="num">$48k<span class="unit">/mo</span></div><div class="label">Refund exposure</div></div>
-        </div>
-
-        <p style="margin-top: 30px; max-width: 920px;">
-          <strong>KPIs we move:</strong> auto-resolution rate (40 % → 75 %),
-          mean time to resolution (minutes → seconds), CSAT for frustrated customers
-          (escalate earlier with full context), refund leakage (every refund &gt; $200 hits a human).
-        </p>
-      </section>
-
-      <!-- ============================== SEGMENT 2 — ARCHITECTURE WALKTHROUGH (2 min) — pt 1/3 ============================== -->
-      <section>
-        <span class="kicker">Segment 2 · 2 min · Architecture — pattern choice</span>
-        <h2>Why LangGraph, not a single chatbot.</h2>
-
-        <div class="grid cols-2" style="margin-top: 28px;">
-          <div class="panel">
-            <h3 style="color: var(--bad);">Single chatbot</h3>
-            <ul>
-              <li>Conditional routing buried in a prompt</li>
-              <li>No clean way to pause for a human</li>
-              <li>State is implicit, untyped, easily lost</li>
-              <li>"Resume" means replaying the full chat</li>
-              <li>Sentiment + escalation rules drift together</li>
-            </ul>
-          </div>
-          <div class="panel" style="border-color: rgba(95,255,167,0.35); box-shadow: 0 0 40px rgba(95,255,167,0.05);">
-            <h3 style="color: var(--ok);">LangGraph (this build)</h3>
-            <ul>
-              <li>Explicit nodes — classify / solve / monitor / escalate</li>
-              <li><code>interrupt()</code> pauses + persists waiting for the human</li>
-              <li><code>SqliteSaver</code> checkpoints survive process restarts</li>
-              <li><code>Command(resume=…)</code> picks up at the exact node</li>
-              <li>Pydantic <code>SupportState</code> — one schema, one source of truth</li>
-            </ul>
-          </div>
-        </div>
-
-        <p style="margin-top: 28px;">
-          <span class="pill blue">required pattern</span>
-          &nbsp; Human-in-the-Loop + Conditional Routing — the rubric's most-asked combination.
-        </p>
-      </section>
-
-      <!-- ============================== SEGMENT 2 — pt 2/3 — STATE DIAGRAM (rubric-required) ============================== -->
-      <section>
-        <span class="kicker">Segment 2 · 2 min · Architecture — state diagram</span>
-        <h2>The graph, generated from <code>graph.get_graph()</code>.</h2>
-
-        <div style="display: grid; grid-template-columns: 1.35fr 1fr; gap: 28px; margin-top: 18px; align-items: stretch;">
-          <div class="svg-card">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620">
-              <style>
-                .box { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 12; }
-                .gate { fill: #fff7ed; stroke: #c2410c; stroke-width: 2; rx: 12; }
-                .text { font: 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; text-anchor: middle; font-weight: 500; }
-                .small { font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; text-anchor: middle; }
-                .line { stroke: #475569; stroke-width: 2; marker-end: url(#arrow-deck); fill: none; }
-              </style>
-              <defs><marker id="arrow-deck" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#475569" /></marker></defs>
-              <rect class="box" x="430" y="25" width="220" height="58"/><text class="text" x="540" y="59">classifier</text>
-              <rect class="box" x="410" y="120" width="260" height="58"/><text class="text" x="540" y="154">sentiment_monitor</text>
-              <rect class="box" x="70" y="250" width="190" height="58"/><text class="text" x="165" y="284">bug_solver</text>
-              <rect class="box" x="310" y="250" width="190" height="58"/><text class="text" x="405" y="284">billing_solver</text>
-              <rect class="box" x="550" y="250" width="190" height="58"/><text class="text" x="645" y="284">feature_solver</text>
-              <rect class="box" x="790" y="250" width="190" height="58"/><text class="text" x="885" y="284">general_solver</text>
-              <rect class="gate" x="390" y="390" width="300" height="68"/><text class="text" x="540" y="418">escalation_gate</text><text class="small" x="540" y="440">interrupt() for supervisor</text>
-              <rect class="box" x="405" y="520" width="270" height="58"/><text class="text" x="540" y="554">response_composer</text>
-              <path class="line" d="M540 83 V120"/>
-              <path class="line" d="M520 178 C460 210 230 210 165 250"/>
-              <path class="line" d="M535 178 C500 215 430 215 405 250"/>
-              <path class="line" d="M545 178 C580 215 625 215 645 250"/>
-              <path class="line" d="M560 178 C640 210 815 210 885 250"/>
-              <path class="line" d="M165 308 C210 360 410 350 470 390"/>
-              <path class="line" d="M405 308 C420 345 460 360 505 390"/>
-              <path class="line" d="M645 308 C630 345 600 360 570 390"/>
-              <path class="line" d="M885 308 C820 365 670 355 610 390"/>
-              <path class="line" d="M540 458 V520"/>
-            </svg>
-            <p style="margin: 12px 4px 0; font-size: 0.95rem; color: #475569; text-align: center;">
-              Committed at <code style="color:#1e293b;">assets/support_escalator_graph.svg</code> · also rendered live in the Streamlit <strong>Architecture</strong> tab.
-            </p>
-          </div>
-          <div>
-            <div class="panel" style="height: 100%;">
-              <div class="stat-row"><span class="k">classifier</span><span class="v">→ category</span></div>
-              <div class="stat-row"><span class="k">sentiment_monitor</span><span class="v">→ 0–1 score</span></div>
-              <div class="stat-row"><span class="k">4 solvers</span><span class="v">conditional edge by category</span></div>
-              <div class="stat-row"><span class="k">escalation_gate</span><span class="v" style="color: var(--warn);">interrupt()</span></div>
-              <div class="stat-row"><span class="k">supervisor</span><span class="v">human-in-the-loop</span></div>
-              <div class="stat-row"><span class="k">response_composer</span><span class="v">→ final_response</span></div>
-
-              <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 10px;">
-                <span class="pill ok">classifier + sentiment → gpt-4.1-nano (rule-based fallback)</span>
-                <span class="pill warn">interrupts persist via SqliteSaver</span>
-                <span class="pill blue">conditional routing + HITL — both required patterns</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================== SEGMENT 2 — pt 3/3 — STATE SCHEMA ============================== -->
-      <section>
-        <span class="kicker">Segment 2 · 2 min · Architecture — typed state</span>
-        <h2>One Pydantic schema, end to end.</h2>
-
-        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; margin-top: 18px; align-items: stretch;">
-          <div>
-            <pre><code class="language-python">class SupportState(BaseModel):
-    ticket: TicketInput
-    category: Literal['bug','billing','feature','general'] | None = None
-    resolution_attempts: list[ResolutionAttempt] = []
-    sentiment_score: float = 0.0
-    escalation_reason: str | None = None
-    supervisor_input: str | None = None
-    final_response: str | None = None
-    ticket_metadata: dict[str, str] = {}</code></pre>
-            <p style="margin-top: 18px;">
-              Every node returns a <em>partial</em> state dict. LangGraph merges. Pydantic validates.
-              <code>category</code> is a <code>Literal</code> — invalid transitions can't compile.
-            </p>
-            <p style="margin-top: 14px;">
-              <span class="pill ok">17 / 17 tests · graph + UI normalization + LLM fallback + checkpoint resume</span>
-            </p>
-          </div>
-          <div>
-            <div id="graph3d" style="height: 60vh; min-height: 380px;"></div>
-            <p style="margin-top: 10px; text-align: center; color: var(--ink-2); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
-              Live 3D: drag to rotate the same graph the SVG above shows
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================== SEGMENT 3 — DEMO (3 min, pre-recorded) — pt 1/3 ============================== -->
-      <section>
-        <span class="kicker">Segment 3 · 3 min · Demo (pre-recorded) — Path 1 / 3</span>
-        <h2>Auto-resolution. Never sees a human.</h2>
-
-        <div class="grid cols-2" style="margin-top: 24px;">
-          <div class="panel">
-            <h3>Ticket</h3>
-            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--ink);">
-              <em style="color: var(--blue-2); font-style: normal;">acct_1001</em> · "How do I reset my password?"
-            </p>
-            <div class="stat-row"><span class="k">classifier (llm)</span><span class="v">general · 0.86</span></div>
-            <div class="stat-row"><span class="k">sentiment</span><span class="v">0.00 calm</span></div>
-            <div class="stat-row"><span class="k">general_solver</span><span class="v" style="color: var(--ok);">resolved ✓</span></div>
-            <div class="stat-row"><span class="k">escalation_gate</span><span class="v">passes through</span></div>
-            <div class="stat-row"><span class="k">response_composer</span><span class="v" style="color: var(--ok);">final ✓</span></div>
-          </div>
-          <div class="panel">
-            <h3>Walkthrough</h3>
-            <ol style="color: var(--ink-2);">
-              <li>Open <strong>Inbox</strong> workspace</li>
-              <li>Pick the password-reset demo ticket</li>
-              <li>Run — watch the timeline animate node-by-node</li>
-              <li>Solver attempt expands inline, KB hit shown</li>
-              <li>Final response composes — header flips green</li>
-            </ol>
-            <p style="margin-top: 14px;">
-              <span class="pill ok">~2.1s end-to-end</span>
-              <span class="pill blue" style="margin-left: 6px;">no interrupt</span>
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================== SEGMENT 3 — DEMO pt 2/3 ============================== -->
-      <section>
-        <span class="kicker">Segment 3 · 3 min · Demo (pre-recorded) — Path 2 / 3</span>
-        <h2>Refund above threshold → human-in-the-loop.</h2>
-
-        <div class="grid cols-2" style="margin-top: 24px;">
-          <div class="panel">
-            <h3>Ticket</h3>
-            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--ink);">
-              <em style="color: var(--blue-2); font-style: normal;">acct_1002</em> · "I was charged twice for invoice 42, please refund."
-            </p>
-            <div class="stat-row"><span class="k">classifier (llm)</span><span class="v">billing · 0.94</span></div>
-            <div class="stat-row"><span class="k">billing_solver</span><span class="v" style="color: var(--warn);">unresolved · refund &gt; $200</span></div>
-            <div class="stat-row"><span class="k">escalation_gate</span><span class="v" style="color: var(--warn);">interrupt() ⏸</span></div>
-          </div>
-          <div class="panel" style="border-color: rgba(255,180,84,0.35);">
-            <h3>Supervisor card appears</h3>
-            <ul>
-              <li>Reason · refund exposure exceeds threshold</li>
-              <li>Account context · plan, MRR, refund history</li>
-              <li>Sentiment · 0.10 calm</li>
-              <li>Approve or reject + free-form guidance</li>
-            </ul>
-            <p style="margin-top: 14px;">
-              <span class="pill warn">paused on disk</span>
-              <span class="pill blue" style="margin-left: 6px;">resume via Command(resume=…)</span>
-            </p>
-            <p style="font-size: 0.95rem; color: var(--ink-2); margin-top: 10px;">
-              Kill the process now. Restart Streamlit. The ticket is still paused — pick it from the sidebar's <em>Resume previous thread</em>.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================== SEGMENT 3 — DEMO pt 3/3 ============================== -->
-      <section>
-        <span class="kicker">Segment 3 · 3 min · Demo (pre-recorded) — Path 3 / 3</span>
-        <h2>Sentiment escalation. Tone, not topic.</h2>
-
-        <div class="grid cols-2" style="margin-top: 24px;">
-          <div class="panel">
-            <h3>Ticket</h3>
-            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--ink);">
-              <em style="color: var(--blue-2); font-style: normal;">acct_1003</em> · "This is my third email and nobody is helping!!! Upload is failing."
-            </p>
-            <div class="stat-row"><span class="k">classifier (llm)</span><span class="v">bug · 0.92</span></div>
-            <div class="stat-row"><span class="k">sentiment (llm)</span><span class="v" style="color: var(--bad);">0.80 frustrated</span></div>
-            <div class="stat-row"><span class="k">bug_solver</span><span class="v" style="color: var(--warn);">unresolved</span></div>
-            <div class="stat-row"><span class="k">escalation_gate</span><span class="v" style="color: var(--warn);">interrupt() ⏸</span></div>
-          </div>
-          <div class="panel">
-            <h3>Why this matters</h3>
-            <p>
-              The solver couldn't fix it <em>and</em> the customer is venting. Two independent risk signals — refund threshold doesn't fire here, sentiment does.
-            </p>
-            <p style="margin-top: 12px;">
-              Reject the auto-response. Final response stays <em>open</em> with rejection guidance attached, not auto-closed.
-            </p>
-            <p style="margin-top: 14px;">
-              <span class="pill bad">two-axis escalation</span>
-              <span class="pill blue" style="margin-left: 6px;">tone-aware</span>
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================== SEGMENT 4 — KPIs, EDGE CASES, LEARNINGS (1.5 min) — pt 1/3 ============================== -->
-      <section>
-        <span class="kicker">Segment 4 · 1.5 min · KPIs &amp; business impact</span>
-        <h2>KPIs visible in the dashboard, live.</h2>
-
-        <div class="grid cols-4" style="margin-top: 28px;">
-          <div class="kpi"><div class="num">68<span class="unit">%</span></div><div class="label">Auto-resolution rate</div></div>
-          <div class="kpi"><div class="num">22<span class="unit">%</span></div><div class="label">Escalations</div></div>
-          <div class="kpi"><div class="num">0.34</div><div class="label">Avg sentiment</div></div>
-          <div class="kpi"><div class="num">$1.6k</div><div class="label">Refund exposure (session)</div></div>
-        </div>
-
-        <div class="grid cols-2" style="margin-top: 28px;">
-          <div class="panel">
-            <h3>Charts the Analytics tab renders</h3>
-            <ul>
-              <li>Category mix (bug / billing / feature / general)</li>
-              <li>Sentiment trend across the session</li>
-              <li>Solver status (resolved vs unresolved)</li>
-              <li>Escalation reasons (refund vs sentiment vs unresolved)</li>
-            </ul>
-          </div>
-          <div class="panel">
-            <h3>Mosaic Cloud KPIs we move</h3>
-            <ul>
-              <li><strong>First-response time</strong> ↓ — auto-resolved in seconds, not hours</li>
-              <li><strong>Refund leakage</strong> ↓ — every refund &gt; $200 hits a human</li>
-              <li><strong>CSAT</strong> ↑ — frustrated customers always meet a human</li>
-              <li><strong>Agent load</strong> ↓ — only the 22% that need it</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================== SEGMENT 4 — pt 2/3 — EDGE CASES + WHAT BROKE & HOW WE FIXED ============================== -->
-      <section>
-        <span class="kicker">Segment 4 · 1.5 min · Edge cases + what broke &amp; how we fixed</span>
-        <h2>The interesting failures.</h2>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 22px;">
-          <div class="panel">
-            <h3 style="color: var(--warn);">Edge cases handled by design</h3>
-            <ul>
-              <li><strong>Missing account</strong> — solver records the gap, gate escalates</li>
-              <li><strong>Unresolved bug</strong> — solver returns <code>resolved=False</code>; gate trips</li>
-              <li><strong>Angry tone</strong> — sentiment ≥ 0.67 always escalates</li>
-              <li><strong>Refund &gt; $200</strong> — hard cap; LLM never auto-fires it</li>
-              <li><strong>Supervisor rejects</strong> — ticket stays <em>open</em>, guidance attached</li>
-              <li><strong>LLM down or no key</strong> — rule-based fallback keeps the graph working</li>
-            </ul>
-          </div>
-          <div class="panel" style="border-color: rgba(255,122,138,0.35);">
-            <h3 style="color: var(--bad);">What broke. How we fixed it.</h3>
-            <ul>
-              <li><strong>Bug:</strong> <code>'ResolutionAttempt' object is not subscriptable</code> in Streamlit. <strong>Fix:</strong> added <code>ui_state.to_plain()</code> normalization layer + regression tests so any Pydantic / dict / Interrupt renders safely.</li>
-              <li><strong>Bug:</strong> demo state lost on every Streamlit rerun. <strong>Fix:</strong> swapped <code>MemorySaver</code> for <code>SqliteSaver</code> with a per-session <code>thread_id</code> the sidebar surfaces.</li>
-              <li><strong>Bug:</strong> Reveal.js painted the deck white over our navy theme. <strong>Fix:</strong> CSS overrides on <code>.reveal-viewport</code>, <code>.reveal .slides</code>, etc. with <code>!important</code>.</li>
-              <li><strong>Bug:</strong> <code>mermaid.ink</code> blocked from sandbox during graph PNG render. <strong>Fix:</strong> committed an authored SVG so the artifact is always present.</li>
-            </ul>
-          </div>
-        </div>
-
-        <p style="margin-top: 20px;">
-          <span class="pill ok">17 / 17 tests</span>
-          &nbsp;&nbsp;
-          <span class="pill blue">Iron law: every bug we hit ships with a regression test.</span>
-        </p>
-      </section>
-
-      <!-- ============================== SEGMENT 5 — CLOSE (0.5 min) ============================== -->
-      <section>
-        <span class="kicker">Segment 5 · 0.5 min · Close — limitations &amp; what's next</span>
-        <h2>What we'd ship next.</h2>
-
-        <div class="grid cols-2" style="margin-top: 28px;">
-          <div class="panel">
-            <h3>Honest limitations</h3>
-            <ul>
-              <li>KB is a small synthetic corpus — production needs RAG over real docs</li>
-              <li>Single-tenant SQLite checkpointer — Postgres at real scale</li>
-              <li>One supervisor seat — production needs a queue with assignment</li>
-              <li>No SLA enforcement yet — sidebar control wired, logic stubbed</li>
-            </ul>
-          </div>
-          <div class="panel">
-            <h3>Next steps</h3>
-            <ul>
-              <li>SLA timers per category with breach-triggered escalation</li>
-              <li>Zendesk webhook adapter (one-way ingest first)</li>
-              <li>Multilingual response drafting via the same LLM node</li>
-              <li>CSV / PDF export from the Inbox for ops audits</li>
-              <li>LangSmith traces for production observability</li>
-            </ul>
-          </div>
-        </div>
-
-        <p style="margin-top: 28px; font-size: 1.25rem;">
-          End-to-end: &lt;200ms without an LLM, ~2s with <code>gpt-4.1-nano</code>. The supervisor is the long pole — and that's correct.
-        </p>
-      </section>
-
-      <!-- ============================== SEGMENT 6 — Q&A (2 min) ============================== -->
-      <section>
-        <span class="kicker">Segment 6 · 2 min · Q&amp;A</span>
-        <h2>Thank you.</h2>
-        <p style="font-size: 1.55rem; max-width: 820px;">
-          The repo is public. The graph is one file. The state is one Pydantic schema.
-          The supervisor is a real human in the loop — not a prompt pretending.
-        </p>
-
-        <div style="margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap;">
-          <span class="pill blue">github.com/DivyamJindal/deploying-ai-agents-exam</span>
-          <span class="pill ok">17 / 17 tests passing</span>
-          <span class="pill blue">streamlit run app.py</span>
-          <span class="pill warn">SqliteSaver checkpoint at checkpoints/se.sqlite</span>
-        </div>
-
-        <div class="panel" style="margin-top: 32px;">
-          <h3>Likely Q&amp;A targets</h3>
-          <ul>
-            <li><strong>Why this pattern?</strong> Routing and interrupts are both required — categories fan out, escalation is human-gated.</li>
-            <li><strong>What if a node fails?</strong> Partial state is preserved in <code>resolution_attempts</code>; production wraps each solver in retry + escalates unresolved tickets.</li>
-            <li><strong>How does state prevent invalid transitions?</strong> Pydantic <code>Literal</code> on <code>category</code>, structured <code>ResolutionAttempt</code>, normalized via <code>to_plain</code> before the UI.</li>
-            <li><strong>What if the supervisor rejects?</strong> Final response carries the rejection guidance and the ticket stays <em>open</em>.</li>
-            <li><strong>How do you measure auto-resolution?</strong> Analytics tab calls <code>summarize_run</code> over the run history live.</li>
-          </ul>
-        </div>
-      </section>
-
-    </div>
-  </div>
-
-  <!-- Reveal core -->
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
-
-  <!-- three.js for the orb (loaded as a UMD global) -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-
-  <!-- 3d-force-graph for the architecture slide -->
-  <script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
-
-  <script>
-    // ============================== REVEAL ==============================
-    Reveal.initialize({
-      hash: true,
-      slideNumber: 'c/t',
-      transition: 'fade',
-      transitionSpeed: 'fast',
-      backgroundTransition: 'fade',
-      controls: true,
-      progress: true,
-      width: 1600,
-      height: 1000,
-      margin: 0.04,
-      minScale: 0.3,
-      maxScale: 1.6,
-    });
-
-    // ============================== ANIMATED ORB (title slide) ==============================
-    (function () {
-      const canvas = document.getElementById('orb');
-      if (!canvas || typeof THREE === 'undefined') return;
-
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-      camera.position.set(0, 0, 5);
-
-      // Wireframe icosahedron — supermemory's blue orb cousin
-      const geom = new THREE.IcosahedronGeometry(1.6, 4);
-      const mat = new THREE.MeshBasicMaterial({
-        color: 0x4f7dff,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.55,
-      });
-      const orb = new THREE.Mesh(geom, mat);
-      scene.add(orb);
-
-      // Glow shell
-      const glowGeom = new THREE.IcosahedronGeometry(1.85, 2);
-      const glowMat = new THREE.MeshBasicMaterial({
-        color: 0x00e0ff,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.18,
-      });
-      const glow = new THREE.Mesh(glowGeom, glowMat);
-      scene.add(glow);
-
-      // Particles
-      const partGeom = new THREE.BufferGeometry();
-      const N = 600;
-      const positions = new Float32Array(N * 3);
-      for (let i = 0; i < N; i++) {
-        const r = 2.4 + Math.random() * 1.8;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        positions[i * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
-        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-        positions[i * 3 + 2] = r * Math.cos(phi);
-      }
-      partGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const partMat = new THREE.PointsMaterial({
-        color: 0x84a4ff,
-        size: 0.025,
-        transparent: true,
-        opacity: 0.7,
-      });
-      const particles = new THREE.Points(partGeom, partMat);
-      scene.add(particles);
-
-      function resize() {
-        const r = canvas.getBoundingClientRect();
-        renderer.setSize(r.width, r.height, false);
-        camera.aspect = r.width / Math.max(r.height, 1);
-        camera.updateProjectionMatrix();
-      }
-      resize();
-      window.addEventListener('resize', resize);
-
-      let t = 0;
-      function animate() {
-        t += 0.005;
-        orb.rotation.y += 0.0035;
-        orb.rotation.x += 0.0015;
-        glow.rotation.y -= 0.0018;
-        particles.rotation.y += 0.0008;
-        camera.position.x = Math.sin(t) * 0.25;
-        camera.position.y = Math.cos(t * 0.7) * 0.18;
-        camera.lookAt(0, 0, 0);
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      }
-      animate();
-    })();
-
-    // ============================== 3D FORCE GRAPH (architecture slide) ==============================
-    (function () {
-      const el = document.getElementById('graph3d');
-      if (!el || typeof ForceGraph3D === 'undefined') return;
-
-      const COLORS = {
-        routing: '#4f7dff',
-        solver: '#00e0ff',
-        gate: '#ffb454',
-        terminal: '#5fffa7',
-        start: '#ffffff',
-      };
-
-      const data = {
-        nodes: [
-          { id: 'START', kind: 'start', val: 6 },
-          { id: 'classifier', kind: 'routing', val: 12 },
-          { id: 'sentiment_monitor', kind: 'routing', val: 10 },
-          { id: 'bug_solver', kind: 'solver', val: 8 },
-          { id: 'billing_solver', kind: 'solver', val: 8 },
-          { id: 'feature_solver', kind: 'solver', val: 8 },
-          { id: 'general_solver', kind: 'solver', val: 8 },
-          { id: 'escalation_gate', kind: 'gate', val: 14 },
-          { id: 'supervisor', kind: 'gate', val: 10 },
-          { id: 'response_composer', kind: 'terminal', val: 12 },
-          { id: 'END', kind: 'terminal', val: 6 },
-        ],
-        links: [
-          { source: 'START', target: 'classifier' },
-          { source: 'classifier', target: 'sentiment_monitor' },
-          { source: 'sentiment_monitor', target: 'bug_solver' },
-          { source: 'sentiment_monitor', target: 'billing_solver' },
-          { source: 'sentiment_monitor', target: 'feature_solver' },
-          { source: 'sentiment_monitor', target: 'general_solver' },
-          { source: 'bug_solver', target: 'escalation_gate' },
-          { source: 'billing_solver', target: 'escalation_gate' },
-          { source: 'feature_solver', target: 'escalation_gate' },
-          { source: 'general_solver', target: 'escalation_gate' },
-          { source: 'escalation_gate', target: 'supervisor', interrupt: true },
-          { source: 'supervisor', target: 'response_composer' },
-          { source: 'escalation_gate', target: 'response_composer' },
-          { source: 'response_composer', target: 'END' },
-        ],
-      };
-
-      const Graph = ForceGraph3D()(el)
-        .backgroundColor('rgba(0,0,0,0)')
-        .nodeLabel((n) => `<div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#e6ecff; padding:6px 9px; background:#0b1233; border:1px solid #1c2554; border-radius:6px;">${n.id}</div>`)
-        .nodeColor((n) => COLORS[n.kind] || '#4f7dff')
-        .nodeOpacity(0.95)
-        .linkColor((l) => (l.interrupt ? '#ffb454' : 'rgba(132,164,255,0.55)'))
-        .linkWidth((l) => (l.interrupt ? 1.2 : 0.6))
-        .linkDirectionalParticles((l) => (l.interrupt ? 4 : 2))
-        .linkDirectionalParticleSpeed(0.006)
-        .linkDirectionalParticleColor((l) => (l.interrupt ? '#ffb454' : '#84a4ff'))
-        .linkDirectionalParticleWidth(2)
-        .nodeThreeObjectExtend(false)
-        .graphData(data);
-
-      // Lazy resize on slide change
-      function resizeGraph() {
-        const r = el.getBoundingClientRect();
-        Graph.width(r.width).height(r.height);
-      }
-      resizeGraph();
-      window.addEventListener('resize', resizeGraph);
-      Reveal.on('slidechanged', () => setTimeout(resizeGraph, 50));
-
-      // Gentle camera drift
-      let drift = 0;
-      setInterval(() => {
-        drift += 0.005;
-        const cam = Graph.cameraPosition();
-        Graph.cameraPosition({
-          x: cam.x + Math.sin(drift) * 0.6,
-          y: cam.y + Math.cos(drift * 0.8) * 0.3,
-        });
-      }, 60);
-    })();
-  </script>
+<div class="footer"><span>Group 9 · SupportEscalator</span><span>UGDSAI 29 · Problem 9</span></div>
+<div class="reveal"><div class="slides">
+<section>
+  <span class="eyebrow">UGDSAI 29 · Problem 9 · Group 9</span>
+  <h1>SupportEscalator</h1>
+  <p class="sub" style="font-size:1.42rem;max-width:860px;margin-top:20px">A LangGraph support-ticket agent that resolves routine SaaS tickets automatically and pauses for a human supervisor when policy, sentiment, or unresolved work demands escalation.</p>
+  <div style="margin-top:24px"><span class="pill">Human-in-the-Loop</span><span class="pill">Conditional Routing</span><span class="pill">Pydantic v2</span><span class="pill">Streamlit</span><span class="pill ok">30/30 tests</span></div>
+  <div class="panel" style="margin-top:42px;max-width:940px"><h3>Team</h3><p style="margin:.55em 0 0">Divyam Jindal · Bhanu Uday · Ishaan Bansal · Harman Manik</p><p class="sub mono" style="margin-top:10px">Format: PDF deck · 8 min presentation + 2 min Q&amp;A</p></div>
+</section>
+<section>
+  <span class="eyebrow">Segment 1 · Problem framing</span>
+  <h2>Mosaic Cloud needs faster support without unsafe automation.</h2>
+  <div class="grid cols4" style="margin-top:32px"><div class="metric"><div class="num">2,000+</div><div class="lab">tickets/day</div><div class="note">Volume from the brief</div></div><div class="metric"><div class="num">40%</div><div class="lab">current unassisted</div><div class="note">Starting point</div></div><div class="metric"><div class="num">75%</div><div class="lab">auto-resolution target</div><div class="note">Business goal</div></div><div class="metric"><div class="num">$200+</div><div class="lab">refund approval</div><div class="note">Supervisor threshold</div></div></div>
+  <p class="quote" style="margin-top:34px">The business risk is not just slow support. It is resolving risky tickets without the right human review, or sending every routine ticket to a human and wasting capacity.</p>
+</section>
+<section>
+  <span class="eyebrow">Segment 1 · User + KPIs</span>
+  <h2>The target user is the support operations lead.</h2>
+  <div class="grid cols2" style="margin-top:28px"><div class="panel"><h3>What they need</h3><ul><li>Routine tickets resolved in seconds</li><li>Risky cases escalated with context</li><li>Clear audit trail for refunds and angry customers</li><li>Evidence that automation is behaving correctly</li></ul></div><div class="panel"><h3>KPIs we track</h3><ul><li>Auto-resolution rate: target 75%</li><li>Mean time to resolution</li><li>CSAT for frustrated customers</li><li>Escalation appropriateness</li><li>Refund exposure routed to supervisors</li></ul></div></div>
+</section>
+<section>
+  <span class="eyebrow">Segment 2 · Solution overview</span>
+  <h2>One graph. Four specialist paths. One escalation gate.</h2>
+  <div class="flow"><div class="node"><div class="n">01</div><div class="t">Ticket input</div><div class="d">customer message + account id</div></div><div class="node"><div class="n">02</div><div class="t">Classifier</div><div class="d">bug / billing / feature / general</div></div><div class="node"><div class="n">03</div><div class="t">Sentiment</div><div class="d">frustration score feeds risk</div></div><div class="node"><div class="n">04</div><div class="t">Solver</div><div class="d">KB search, account lookup, refund calc</div></div><div class="node hot"><div class="n">05</div><div class="t">Escalation gate</div><div class="d">interrupt if angry, refund high, unresolved</div></div><div class="node"><div class="n">06</div><div class="t">Final response</div><div class="d">customer reply + metadata</div></div></div>
+  <p class="sub" style="margin-top:28px">This is intentionally not a single chatbot. The control flow is explicit, inspectable, and resumable.</p>
+</section>
+<section>
+  <span class="eyebrow">Segment 2 · LangGraph architecture</span>
+  <h2>Architecture diagram committed in the repository.</h2>
+  <div style="display:grid;grid-template-columns:1.35fr .85fr;gap:26px;margin-top:20px"><div class="diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620"><style>.box{fill:#f8fafc;stroke:#334155;stroke-width:2;rx:12}.gate{fill:#fff7ed;stroke:#c2410c;stroke-width:2;rx:12}.text{font:18px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#0f172a;text-anchor:middle;font-weight:600}.small{font:14px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#334155;text-anchor:middle}.line{stroke:#475569;stroke-width:2;marker-end:url(#arrow);fill:none}</style><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#475569"/></marker></defs><rect class="box" x="430" y="25" width="220" height="58"/><text class="text" x="540" y="59">classifier</text><rect class="box" x="410" y="120" width="260" height="58"/><text class="text" x="540" y="154">sentiment_monitor</text><rect class="box" x="70" y="250" width="190" height="58"/><text class="text" x="165" y="284">bug_solver</text><rect class="box" x="310" y="250" width="190" height="58"/><text class="text" x="405" y="284">billing_solver</text><rect class="box" x="550" y="250" width="190" height="58"/><text class="text" x="645" y="284">feature_solver</text><rect class="box" x="790" y="250" width="190" height="58"/><text class="text" x="885" y="284">general_solver</text><rect class="gate" x="390" y="390" width="300" height="68"/><text class="text" x="540" y="418">escalation_gate</text><text class="small" x="540" y="440">interrupt() for supervisor</text><rect class="box" x="405" y="520" width="270" height="58"/><text class="text" x="540" y="554">response_composer</text><path class="line" d="M540 83 V120"/><path class="line" d="M520 178 C460 210 230 210 165 250"/><path class="line" d="M535 178 C500 215 430 215 405 250"/><path class="line" d="M545 178 C580 215 625 215 645 250"/><path class="line" d="M560 178 C640 210 815 210 885 250"/><path class="line" d="M165 308 C210 360 410 350 470 390"/><path class="line" d="M405 308 C420 345 460 360 505 390"/><path class="line" d="M645 308 C630 345 600 360 570 390"/><path class="line" d="M885 308 C820 365 670 355 610 390"/><path class="line" d="M540 458 V520"/></svg><p>Source: <code>assets/support_escalator_graph.svg</code></p></div><div class="panel"><h3>Why this pattern scores</h3><ul><li>Conditional edges route by category.</li><li><code>interrupt()</code> creates real human-in-the-loop escalation.</li><li><code>SqliteSaver</code> persists paused runs.</li><li>Pydantic state makes every transition inspectable.</li></ul></div></div>
+</section>
+<section>
+  <span class="eyebrow">Segment 2 · Typed state</span>
+  <h2>The state schema is the product contract.</h2>
+  <div class="grid cols2" style="margin-top:26px"><div class="panel"><table class="table"><tr><th>Field</th><th>Purpose</th></tr><tr><td><code>ticket</code></td><td>Original customer issue</td></tr><tr><td><code>category</code></td><td>Literal route: bug, billing, feature, general</td></tr><tr><td><code>resolution_attempts</code></td><td>Audit trail of solver outputs</td></tr><tr><td><code>sentiment_score</code></td><td>Risk signal into escalation</td></tr><tr><td><code>escalation_reason</code></td><td>Human review trigger</td></tr><tr><td><code>supervisor_input</code></td><td>Resume payload from the human</td></tr><tr><td><code>final_response</code></td><td>Customer-facing answer</td></tr></table></div><div class="panel"><h3>Engineering proof</h3><ul><li>OpenAI structured output for classifier + sentiment.</li><li>Deterministic fallback when no API key is set.</li><li>UI normalization prevents Pydantic/dict shape crashes.</li><li>Checkpoint tests verify pause/resume behavior.</li></ul><div style="margin-top:18px"><span class="pill ok">30 / 30 tests</span><span class="pill ok">6 evaluation cases</span></div></div></div>
+</section>
+<section>
+  <span class="eyebrow">Segment 3 · Demo flows</span>
+  <h2>The demo proves all required behaviours.</h2>
+  <div class="grid cols3" style="margin-top:28px"><div class="panel"><h3>1. Password reset</h3><p class="sub">General ticket resolves automatically.</p><table class="table"><tr><td class="muted">Route</td><td><code>general_solver</code></td></tr><tr><td class="muted">Escalation</td><td>None</td></tr><tr><td class="muted">Outcome</td><td>Final response ready</td></tr></table></div><div class="panel"><h3>2. Duplicate billing</h3><p class="sub">Refund exceeds the supervisor threshold.</p><table class="table"><tr><td class="muted">Route</td><td><code>billing_solver</code></td></tr><tr><td class="muted">Trigger</td><td>$499 refund &gt; $200</td></tr><tr><td class="muted">Outcome</td><td><code>interrupt()</code> + resume</td></tr></table></div><div class="panel"><h3>3. Angry upload bug</h3><p class="sub">Tone and unresolved bug both create risk.</p><table class="table"><tr><td class="muted">Route</td><td><code>bug_solver</code></td></tr><tr><td class="muted">Trigger</td><td>sentiment ≥ 0.67</td></tr><tr><td class="muted">Outcome</td><td>Supervisor guidance included</td></tr></table></div></div>
+</section>
+<section>
+  <span class="eyebrow">Segment 4 · Evaluation and results</span>
+  <h2>We tested the graph like an evaluator would.</h2>
+  <div class="grid cols4" style="margin-top:30px"><div class="metric"><div class="num">30/30</div><div class="lab">tests pass</div><div class="note">latest local run</div></div><div class="metric"><div class="num">6</div><div class="lab">eval scenarios</div><div class="note">all expected behaviours</div></div><div class="metric"><div class="num">4</div><div class="lab">solver routes</div><div class="note">bug, billing, feature, general</div></div><div class="metric"><div class="num">3</div><div class="lab">escalation triggers</div><div class="note">sentiment, refund, unresolved</div></div></div>
+  <div class="panel" style="margin-top:28px"><table class="table"><tr><th>Representative case</th><th>Expected behaviour</th><th>Proof</th></tr><tr><td>Password reset</td><td>general route, no interrupt</td><td><code>test_general_ticket_resolves_without_interrupt</code></td></tr><tr><td>Duplicate billing</td><td>billing route, refund interrupt, resume</td><td><code>test_billing_refund_interrupts_and_resumes</code></td></tr><tr><td>Angry upload bug</td><td>bug route, sentiment interrupt</td><td><code>test_angry_bug_ticket_interrupts_for_sentiment</code></td></tr><tr><td>Unknown account</td><td>unresolved billing escalates</td><td><code>tests/test_evaluation.py</code></td></tr></table></div>
+</section>
+<section>
+  <span class="eyebrow">Segment 4 · Business dashboard</span>
+  <h2>The Streamlit UI is an operations console, not just a form.</h2>
+  <div class="grid cols2" style="margin-top:28px"><div class="panel"><h3>Customer / agent view</h3><ul><li>Ticket intake and demo queue</li><li>Customer/account snapshot</li><li>Resolution timeline and solver evidence</li><li>Final response copy/download</li></ul></div><div class="panel"><h3>Supervisor / manager view</h3><ul><li>Pending escalation reason</li><li>Refund exposure and account context</li><li>Approve/reject with guidance</li><li>Analytics: auto-resolution, escalations, sentiment, category mix</li></ul></div></div>
+</section>
+<section>
+  <span class="eyebrow">Segment 4 · Bonus coverage</span>
+  <h2>Bonus work is real, but scoped honestly.</h2>
+  <div class="grid cols2" style="margin-top:28px"><div class="panel"><h3>Implemented / documented</h3><ul><li><strong>LangSmith tracing</strong>: env-driven observability setup.</li><li><strong>Evaluation framework</strong>: 6 named representative cases.</li><li><strong>Prompt iteration</strong>: classifier and sentiment prompts documented in README.</li><li><strong>Supervisor summary</strong>: ticket, sentiment, category, reason, attempted resolution.</li></ul></div><div class="panel"><h3>Next production step</h3><ul><li>SLA timers and breach-triggered escalation.</li><li>Zendesk sandbox adapter for real ticket ingest.</li><li>Multilingual response drafting.</li><li>Postgres checkpointer and supervisor assignment queue.</li></ul></div></div>
+</section>
+<section>
+  <span class="eyebrow">Segment 4 · Risks and learnings</span>
+  <h2>The important fixes are now part of the system.</h2>
+  <div class="grid cols2" style="margin-top:28px"><div class="panel"><h3>What broke</h3><ul><li><code>ResolutionAttempt</code> was a Pydantic object, not a dict.</li><li>Memory-only state made restart demos fragile.</li><li>External graph rendering was unreliable in sandboxed network conditions.</li></ul></div><div class="panel"><h3>How we fixed it</h3><ul><li>Added UI state normalization and regression tests.</li><li>Switched default graph persistence to <code>SqliteSaver</code>.</li><li>Committed a stable SVG diagram artifact.</li></ul></div></div>
+</section>
+<section>
+  <span class="eyebrow">Segment 5 · Close + Segment 6 · Q&amp;A</span>
+  <h2>Thank you.</h2>
+  <p class="sub" style="font-size:1.35rem;max-width:980px">The panel should remember: explicit LangGraph routing, real human pause/resume, 30 passing tests, and a credible support-ops story. Repository, deck, architecture diagram, business memo, and demo script are committed for submission.</p>
+  <div style="margin-top:24px"><span class="pill">github.com/DivyamJindal/deploying-ai-agents-exam</span><span class="pill ok">30 / 30 tests</span><span class="pill">LangGraph + Streamlit</span><span class="pill warn">SqliteSaver checkpointing</span></div>
+  <div class="panel" style="margin-top:30px"><h3>Prepared Q&amp;A themes</h3><ul><li>Why this LangGraph pattern instead of one chatbot?</li><li>What happens when a node fails or a supervisor rejects?</li><li>What minimum data is required to make this useful?</li><li>How would this scale beyond the demo?</li></ul></div>
+</section>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>Reveal.initialize({hash:true,slideNumber:'c/t',transition:'fade',transitionSpeed:'fast',backgroundTransition:'fade',controls:true,progress:true,width:1600,height:1000,margin:0.04,minScale:.3,maxScale:1.5});</script>
 </body>
 </html>

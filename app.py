@@ -59,7 +59,7 @@ THEME_CSS = """
 }
 
 html, body, [class*="css"] {
-  font-family: 'Inter', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'IBM Plex Sans', 'Avenir Next', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .stApp {
@@ -68,6 +68,21 @@ html, body, [class*="css"] {
               linear-gradient(180deg, #07101f 0%, #0b1220 100%);
   color: var(--text);
 }
+
+.stApp::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 50% 10%, black 0%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle at 50% 10%, black 0%, transparent 72%);
+  z-index: 0;
+}
+main, section[data-testid="stSidebar"] { position: relative; z-index: 1; }
 
 section[data-testid="stSidebar"] {
   background: linear-gradient(180deg, #0a1326 0%, #0b1220 100%);

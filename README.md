@@ -65,7 +65,7 @@ The Streamlit app is now styled as a full **ticketing console** with four worksp
 - **Analytics** — KPI cards (auto-resolution rate, escalations, average sentiment, refund exposure) plus Streamlit-native charts for category mix, sentiment trend, solver status, and escalation reasons.
 - **Architecture** — the LangGraph SVG plus the live normalized state JSON for Q&A.
 
-The left sidebar holds the demo ticket queue, thread management, run history, and SLA controls.
+The left sidebar holds the demo ticket queue, thread management, run history, engine-mode status, and LangSmith tracing status.
 
 Use the sidebar demo tickets to drive the three rubric flows:
 
@@ -131,19 +131,25 @@ This prototype uses synthetic support data committed in `data/`:
 
 - **LangSmith tracing** — set `LANGCHAIN_API_KEY` to activate (see setup above).
 - **Evaluation framework** — `tests/test_evaluation.py`, 6 named parametrized scenarios.
-- **Prompt iteration** — documented above; visible in commit history (see `f8a245e`).
-- **Auto-generated supervisor summary** — escalation_gate constructs a structured payload (ticket, category, sentiment, auto_resolution) surfaced in the Supervisor tab.
+- **Prompt iteration** — documented above and visible in the LLM integration commits.
+- **Auto-generated supervisor summary** — escalation_gate constructs a structured payload (ticket, category, sentiment, escalation reason, and auto_resolution) surfaced in the Supervisor tab.
 - Supervisor queue UI, run-history KPIs, Streamlit-native analytics, normalized state layer, dark ticketing-console theme.
 
 ## Team
 
 | Name | Role |
 |------|------|
-| Divyam Jindal | LangGraph graph architecture, escalation gate, checkpointing |
-| Harman Manik | Streamlit UI, analytics tab, test suite & evaluation framework |
-| _(member 3)_ | Classifier & sentiment LLM integration, llm.py |
-| _(member 4)_ | Data sources, KB/accounts, business memo, presentation deck |
+| Divyam Jindal | LangGraph architecture, escalation gate, checkpointing |
+| Bhanu Uday | Streamlit UI, analytics workflow, supervisor experience |
+| Ishaan Bansal | LLM classifier/sentiment integration, prompts, evaluation cases |
+| Harman Manik | Test suite, data/KB setup, documentation, presentation support |
+
+## Deck Link
+
+Live deck (GitHub Pages, after Pages is enabled): https://divyamjindal.github.io/deploying-ai-agents-exam/deck/
+
+PDF deck: `deck/SupportEscalator-Group_9.pdf`
 
 ## Demo Video
 
-[▶ Watch the 3-minute demo](https://youtu.be/PLACEHOLDER) — replace this link once the screen capture is uploaded.
+Upload the 3-minute recording and replace this placeholder with the unlisted YouTube/Drive link.
