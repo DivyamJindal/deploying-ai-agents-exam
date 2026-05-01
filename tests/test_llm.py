@@ -62,3 +62,16 @@ def test_sentiment_falls_back_when_llm_raises(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(llm_mod, "sentiment_llm", boom)
     result = llm_mod.sentiment("nobody is helping me!!!")
     assert result.score > 0.0
+
+
+def test_classify_rule_based_feature():
+    result = llm_mod.classify("Export request", "Can we export data to csv from the reports section?")
+    assert result.category == "feature"
+    assert result.confidence > 0.5
+
+
+def test_sentiment_rule_based_single_anger_word_is_calm():
+    """1 anger keyword = score 0.33, below the 0.34 tense threshold — label must be calm."""
+    result = llm_mod.sentiment("Your product is terrible but otherwise fine.")
+    assert result.score == pytest.approx(0.33)
+    assert result.label == "calm"
