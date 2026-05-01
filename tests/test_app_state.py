@@ -115,3 +115,30 @@ def test_summarize_run_extracts_kpi_fields():
     assert summary["sentiment_score"] == 0.67
     assert summary["account_id"] == "acct_1001"
     assert summary["ticket_title"] == "Upload broken"
+
+
+def test_summarize_run_with_empty_resolution_attempts():
+    state = {
+        "ticket": {"title": "Hello", "account_id": "acct_1001"},
+        "category": "general",
+        "sentiment_score": 0.0,
+        "resolution_attempts": [],
+        "escalation_reason": None,
+        "supervisor_input": None,
+        "final_response": "",
+        "ticket_metadata": {},
+    }
+    summary = summarize_run(state)
+    assert summary["solver"] is None
+    assert summary["solver_resolved"] is False
+    assert summary["category"] == "general"
+    assert summary["ticket_title"] == "Hello"
+
+
+def test_to_plain_serializes_raw_datetime():
+    from datetime import UTC, datetime as dt
+
+    raw_dt = dt(2024, 6, 15, 12, 0, 0, tzinfo=UTC)
+    result = to_plain(raw_dt)
+    assert isinstance(result, str)
+    assert result == raw_dt.isoformat()

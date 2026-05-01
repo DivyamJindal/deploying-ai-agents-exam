@@ -2,6 +2,7 @@ langgraph
 langgraph-checkpoint-sqlite
 langchain-core
 langchain-openai
+langsmith
 pydantic>=2
 streamlit
 python-dotenv
